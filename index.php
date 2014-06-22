@@ -46,9 +46,19 @@ elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
 else:
   getHTMLPageHeader();
 ?>
-  <div 
+<div class="loginpage">
+  <div class="ui-block-a">
 <?php
   getLoginPage();
+?>
+  </div>
+  <div class="ui-block-b">
+    <div class="ui-body">
+      <p>Track and trace the documents at the tip of your fingers.</p>
+    </div>
+  </div>
+</div> 
+<?php  
   getHTMLPageFooter();
 endif;
 ?>

@@ -12,25 +12,24 @@ define('DT_DB_NAME', "documenttracker");
 function getLoginPage()
 {
 ?>
-<section class="ui-field-contain">
-  <header><h1>Login</h1></header>
-  <div>
+<section class="ui-field-contain, ui-corner-all custom-corners">
+  <header class="ui-bar ui-bar-a"><h1>Login</h1></header>
+  <article class="ui-body ui-body-a">
     <form action="./?page=login" method="post">
-      <ul data-role="listview">
-        <li>
-          <label for="uid">ID Number</label>
-          <input type="text" name="uid" id="uid"/>
-        </li>
-        <li>
-          <label for="password">Password</label>
-          <input type="password" name="password" id="password"/>
-        </li>
-        <li>
-          <input type="hidden" name="lasturl" value="<?php echo urlencode(curPageURL()); ?>"/>
-          <input type="submit" value="Login"/>
-        </li>
-      </ul>
+      <div class="ui-field-contain">
+        <label for="uid">ID Number</label>
+        <input type="text" name="uid" id="uid"/>
+      </div>
+      <div class="ui-field-contain">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password"/>
+      </div>
+      <div class="ui-field-contain">
+        <input type="hidden" name="lasturl" value="<?php echo urlencode(curPageURL()); ?>"/>
+        <input type="submit" value="Login" data-icon="forward"/>
+      </div>
     </form>
+  </article>
   </div>
 </section>
 <?php
@@ -45,11 +44,16 @@ function getHTMLPageHeader()
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document Tracker</title>
-    <link rel="stylesheet" href="./css/jquery.mobile.custom.structure.min.css" />
-    <link rel="stylesheet" href="./css/jquery.mobile.custom.theme.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.structure-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.theme-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.external-png-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.icons-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.inline-png-1.4.2.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.inline-svg-1.4.2.min.css" />
     <link rel="stylesheet" href="./css/default.css" />
     <script src="./js/jquery-2.1.1.min.js"></script>
-    <script src="./js/jquery.mobile.custom.min.js"></script>
+    <script src="./js/jquery.mobile-1.4.2.min.js"></script>
   </head>
   <body>
     <div data-role="page">
