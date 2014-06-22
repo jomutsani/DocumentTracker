@@ -12,11 +12,11 @@ define('DT_DB_NAME', "documenttracker");
 function getLoginPage()
 {
 ?>
-<section>
+<section class="ui-field-contain">
   <header><h1>Login</h1></header>
   <div>
     <form action="./?page=login" method="post">
-      <ul>
+      <ul data-role="listview">
         <li>
           <label for="uid">ID Number</label>
           <input type="text" name="uid" id="uid"/>
@@ -27,7 +27,7 @@ function getLoginPage()
         </li>
         <li>
           <input type="hidden" name="lasturl" value="<?php echo urlencode(curPageURL()); ?>"/>
-          <input type="submit"/>
+          <input type="submit" value="Login"/>
         </li>
       </ul>
     </form>
@@ -43,11 +43,18 @@ function getHTMLPageHeader()
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Document Tracker</title>
+    <link rel="stylesheet" href="./css/jquery.mobile.custom.structure.min.css" />
+    <link rel="stylesheet" href="./css/jquery.mobile.custom.theme.min.css" />
+    <link rel="stylesheet" href="./css/default.css" />
+    <script src="./js/jquery-2.1.1.min.js"></script>
+    <script src="./js/jquery.mobile.custom.min.js"></script>
   </head>
   <body>
-    <header><hgroup><h1>Document Tracker</h1></hgroup></header>
-    <div>
+    <div data-role="page">
+    <header data-role="header"><hgroup><h1>Document Tracker</h1></hgroup></header>
+    <div role="main" class="ui-content">
 <?php
 displayNotification();
 }
@@ -55,6 +62,8 @@ displayNotification();
 function getHTMLPageFooter()
 {
 ?>
+    </div>
+    <footer data-role="footer">a</footer>
     </div>
   </body>
 </html>      

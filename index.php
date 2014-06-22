@@ -45,6 +45,9 @@ elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
   header("Location:".urldecode($_POST['lasturl']));
 else:
   getHTMLPageHeader();
+?>
+  <div 
+<?php
   getLoginPage();
   getHTMLPageFooter();
 endif;
