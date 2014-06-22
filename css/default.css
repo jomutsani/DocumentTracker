@@ -24,7 +24,10 @@
     
   }
   .notif0{}
-  .notif1{}
+  .notif1 a{background-color: #FF9 !important;}
   .notif2 a{background-color: #F99 !important;}
   #notif{margin:0px;}
+  #tbluserinfo{
+    
+  }
 }

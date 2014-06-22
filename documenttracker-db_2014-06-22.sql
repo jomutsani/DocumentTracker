@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 22, 2014 at 07:08 PM
+-- Generation Time: Jun 22, 2014 at 07:52 PM
 -- Server version: 5.5.38
 -- PHP Version: 5.4.29
 
@@ -33,7 +33,7 @@ CREATE TABLE `auditlog` (
   `user` int(10) unsigned zerofill NOT NULL COMMENT 'User',
   `page` varchar(100) NOT NULL COMMENT 'Page Name',
   `msg` varchar(512) NOT NULL COMMENT 'Message'
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Audit Log' AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Audit Log' AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `auditlog`
@@ -41,7 +41,10 @@ CREATE TABLE `auditlog` (
 
 INSERT INTO `auditlog` (`id`, `ts`, `type`, `user`, `page`, `msg`) VALUES
 (1, '2014-06-22 17:53:30', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.'),
-(2, '2014-06-22 17:54:38', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.');
+(2, '2014-06-22 17:54:38', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.'),
+(3, '2014-06-22 18:37:05', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.'),
+(4, '2014-06-22 18:38:14', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.'),
+(5, '2014-06-22 18:43:13', 'Info', 0000003597, 'login', 'System Admin(3597) logged in to the system.');
 
 -- --------------------------------------------------------
 
@@ -130,7 +133,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `auditlog`
 --
 ALTER TABLE `auditlog`
-MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit ID',AUTO_INCREMENT=3;
+MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit ID',AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `document`
 --

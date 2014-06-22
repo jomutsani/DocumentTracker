@@ -1,11 +1,14 @@
 <?php
 require_once 'functions.php';
 session_start();
+$_GET['page']=(isset($_GET['page'])?$_GET['page']:"dashboard");
 if(isset($_SESSION['uid'])):
   dbConnect();
   switch ($_GET['page']):
-  case 'login':
-    //echo 'login';
+  case 'logout':
+    session_destroy();
+    setNotification("Successfully logged out.");
+    header("Location: ./");
     break;
 ?>
 

@@ -10,10 +10,45 @@ define('DT_DB_PASSWORD', "P@ssw00rd");
 define('DT_DB_NAME', "documenttracker");
 define('DT_LOG_NAME',"DocumentTracker");
 
-function getLoginPage()
+function getUserInfo()
 {
 ?>
 <section class="" data-role="panel" id="userpanel" data-position="right" data-position-fixed="true" data-display="overlay">
+<?php
+  if(isset($_SESSION['uid']))
+  {  
+?>
+  <header><h1><?php echo $_SESSION['fullname']; ?></h1></header>
+  <article>
+    <table id="tbluserinfo" class="ui-body" data-role="table" data-mode="reflow">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>ID Number</td>
+        <td><?php echo $_SESSION['uid']; ?></td>
+      </tr>
+      <tr>
+        <td>Department</td>
+        <td><?php echo $_SESSION['department']; ?></td>
+      </tr>
+      <tr>
+        <td>Section</td>
+        <td><?php echo $_SESSION['section']; ?></td>
+      </tr>
+      </tbody>
+    </table>
+    <a href="./?page=logout" data-role="button" data-icon="power" data-iconpos="left" data-ajax="false">Logout</a>
+  </article>
+<?php
+  }
+  else
+  {
+?>
   <header><h1>Login</h1></header>
   <article>
     <form action="./?page=login" method="post" data-ajax="false">
@@ -29,7 +64,10 @@ function getLoginPage()
     </form>
   </article>
   </div>
-</section>
+<?php
+  }
+?>
+  </section>
 <?php
 }
 
@@ -72,7 +110,7 @@ function getHTMLPageFooter()
     <footer data-role="footer" data-position="fixed">
       <!--<h1>Quezon Document Tracker</h1>&COPY;2014 Developed by The Aitenshi Project-->
     </footer>
-    <?php getLoginPage(); ?>
+    <?php getUserInfo(); ?>
     </div>
   </body>
 </html>      
@@ -118,7 +156,7 @@ function displayNotification()
   {
 ?>
 <ul data-role="listview" data-inset="true" id="notif" class="notification">
-  <li data-icon="delete" class="notif<?php echo $_COOKIE['notiftype']; ?>"><a href="#"><?php echo $_COOKIE['notifmsg']; ?></a></li>
+  <li data-iconpos="left" data-icon="<?php switch($_COOKIE['notiftype']){case DT_NOTIF_NORMAL:echo "info"; break; case DT_NOTIF_WARNING:echo "alert"; break; case DT_NOTIF_ERROR: echo "delete"; break;} ?>" class="notif<?php echo $_COOKIE['notiftype']; ?>"><a href="#" class=""><?php echo $_COOKIE['notifmsg']; ?></a></li>
 </ul>
 <?php
   setcookie("notifmsg",null,time()-3600);
