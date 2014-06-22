@@ -34,6 +34,7 @@ elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
   {
     $stmt->bind_result($_SESSION['id'],$_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
     while($stmt->fetch()){}
+    writeLog($_SESSION['fullname']."(".$_SESSION['uid'].") logged in to the system.");
   }
   else
   {

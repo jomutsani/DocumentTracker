@@ -8,6 +8,7 @@ define('DT_DB_SERVER', 'localhost');
 define('DT_DB_USER', "root");
 define('DT_DB_PASSWORD', "P@ssw00rd");
 define('DT_DB_NAME', "documenttracker");
+define('DT_LOG_NAME',"DocumentTracker");
 
 function getLoginPage()
 {
@@ -123,5 +124,18 @@ function displayNotification()
   setcookie("notifmsg",null,time()-3600);
   setcookie("notiftype",null,time()-3600);
   }
+}
+
+function writeLog($msg, $type="Info")
+{
+  global $conn;
+  $stmt=$conn->prepare("INSERT INTO auditlog(type,user,page,msg) VALUES(?,?,?,?)");
+  if($stmt === false) {
+    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+  }
+  $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
+  $page=(isset($_GET['page'])?$_GET['page']:"dashboard");
+  $stmt->bind_param('siss',$type,$userid,$page,$msg);
+  $stmt->execute();
 }
 ?>
