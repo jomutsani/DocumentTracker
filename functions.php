@@ -12,22 +12,19 @@ define('DT_DB_NAME', "documenttracker");
 function getLoginPage()
 {
 ?>
-<section class="ui-field-contain, ui-corner-all custom-corners">
-  <header class="ui-bar ui-bar-a"><h1>Login</h1></header>
-  <article class="ui-body ui-body-a">
-    <form action="./?page=login" method="post">
-      <div class="ui-field-contain">
+<section class="" data-role="panel" id="userpanel" data-position="right" data-position-fixed="true" data-display="overlay">
+  <header><h1>Login</h1></header>
+  <article>
+    <form action="./?page=login" method="post" data-ajax="false">
         <label for="uid">ID Number</label>
         <input type="text" name="uid" id="uid"/>
-      </div>
-      <div class="ui-field-contain">
+
         <label for="password">Password</label>
         <input type="password" name="password" id="password"/>
-      </div>
-      <div class="ui-field-contain">
+
         <input type="hidden" name="lasturl" value="<?php echo urlencode(curPageURL()); ?>"/>
         <input type="submit" value="Login" data-icon="forward"/>
-      </div>
+
     </form>
   </article>
   </div>
@@ -54,10 +51,14 @@ function getHTMLPageHeader()
     <link rel="stylesheet" href="./css/default.css" />
     <script src="./js/jquery-2.1.1.min.js"></script>
     <script src="./js/jquery.mobile-1.4.2.min.js"></script>
+    <script src="./js/default.js"></script>
   </head>
   <body>
     <div data-role="page">
-    <header data-role="header"><hgroup><h1>Document Tracker</h1></hgroup></header>
+    <header data-role="header">
+      <h1>Document Tracker</h1>
+      <a href="#userpanel" data-icon="user" data-iconpos="notext" class="ui-btn-right">Account</a>
+    </header>
     <div role="main" class="ui-content">
 <?php
 displayNotification();
@@ -67,7 +68,10 @@ function getHTMLPageFooter()
 {
 ?>
     </div>
-    <footer data-role="footer">a</footer>
+    <footer data-role="footer" data-position="fixed">
+      <!--<h1>Quezon Document Tracker</h1>&COPY;2014 Developed by The Aitenshi Project-->
+    </footer>
+    <?php getLoginPage(); ?>
     </div>
   </body>
 </html>      
@@ -112,9 +116,9 @@ function displayNotification()
   if(isset($_COOKIE['notifmsg']) && isset($_COOKIE['notiftype']))
   {
 ?>
-<aside id="notif" class="notification, notif<?php echo $_COOKIE['notiftype']; ?>">
-  <p><?php echo $_COOKIE['notifmsg']; ?></p>
-</aside>
+<ul data-role="listview" data-inset="true" id="notif" class="notification">
+  <li data-icon="delete" class="notif<?php echo $_COOKIE['notiftype']; ?>"><a href="#"><?php echo $_COOKIE['notifmsg']; ?></a></li>
+</ul>
 <?php
   setcookie("notifmsg",null,time()-3600);
   setcookie("notiftype",null,time()-3600);

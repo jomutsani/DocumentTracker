@@ -49,7 +49,7 @@ else:
 <div class="loginpage">
   <div class="ui-block-a">
 <?php
-  getLoginPage();
+  //getLoginPage();
 ?>
   </div>
   <div class="ui-block-b">
