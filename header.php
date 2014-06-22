@@ -1,7 +1,5 @@
 <?php
-  require_once 'functions.php';
   //openlog("DocTrack", LOG_ODELAY, LOG_USER);
-  session_start();
 ?>
 <!DOCTYPE html>
 <html>
