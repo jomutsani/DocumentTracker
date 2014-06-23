@@ -20,7 +20,7 @@ function getUserInfo()
 ?>
   <header><h1><?php echo $_SESSION['fullname']; ?></h1></header>
   <article>
-    <table id="tbluserinfo" class="ui-body" data-role="table" data-mode="reflow">
+    <table id="tbluserinfo" class="ui-body ui-responsive" data-role="table" data-mode="reflow">
       <thead>
         <tr>
           <th></th>
@@ -115,13 +115,14 @@ function getHTMLPageHeader()
 <?php
 displayNotification();
 ?>
-        <form action="./search" method="get">
+        <form action="./" method="get">
             <div data-role="controlgroup" data-type="horizontal" id="searchform">
-                    <input type="search" name="q" id="q" placeholder="Enter Tracking Number" data-wrapper-class="controlgroup-textinput ui-btn"/>
+                    <input type="search" name="q" id="q" placeholder="Enter Tracking Number" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
                     <input type="submit" data-icon="search" value="Search" data-iconpos="notext"/>
                 </div>
         </form>
 <?php
+getSearchResult();
 }
 
 function getHTMLPageFooter()
@@ -196,5 +197,112 @@ function writeLog($msg, $type="Info")
   $page=(isset($_GET['page'])?$_GET['page']:"dashboard");
   $stmt->bind_param('siss',$type,$userid,$page,$msg);
   $stmt->execute();
+}
+
+function getSearchResult()
+{
+  if((isset($_GET['q'])) && ($_GET['q']!='')):
+    if(isset($_GET['q']))
+    {
+      global $conn;
+      dbConnect();
+      $stmt=$conn->prepare("SELECT a.*, b.uid, b.fullname, b.department, b.section FROM document a INNER JOIN user b ON a.author=b.uid WHERE trackingnumber=?");
+      if($stmt === false) {
+        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+      }
+      $stmt->bind_param('i',$_GET['q']);
+      $stmt->execute();
+      $stmt->store_result();
+      $stmt->bind_result($r_trackingnumber, $r_documentnumber, $r_remarks, $r_datecreated, $r_author, $r_uid, $r_fullname, $r_department, $r_section);
+
+      if($stmt->num_rows <= 0)
+      {
+        ?>
+          <h1>Nothing found</h1>
+          <p>Please verify that you have the correct tracking number and try again.</p>
+        <?php
+      }
+      else
+      {
+        while($stmt->fetch()){
+          ?>
+          <div data-role="collapsible" data-collapsed="false">
+              <h4>Tracking #: <?php printf("%08d",$r_trackingnumber); ?></h4>
+              <table class="documenttableinfo">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Document Number</td>
+                    <td><?php echo $r_documentnumber; ?></td>
+                  </tr>
+                  <tr>
+                    <td>Remarks</td>
+                    <td><?php echo $r_remarks; ?></td>
+                  </tr>
+                  <tr>
+                    <td>Date received</td>
+                    <td><?php echo $r_datecreated; ?></td>
+                  </tr>
+                  <tr>
+                    <td>Staff</td>
+                    <td><?php echo $r_author; ?></td>
+                  </tr>
+                  <tr>
+                    <td>Department</td>
+                    <td><?php echo $r_department." (".$r_section.")"; ?></td>
+                  </tr>
+                </tbody>
+              </table>
+          </div>
+        <?php
+          global $conn;
+          dbConnect();
+          $stmt2=$conn->prepare("SELECT a.*, b.uid, b.fullname, b.department, b.section FROM documentlog a INNER JOIN user b ON a.user=b.uid WHERE trackingnumber=?");
+          if($stmt2 === false) {
+            trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+          }
+          $stmt2->bind_param('i',$_GET['q']);
+          $stmt2->execute();
+          $stmt2->store_result();
+          $stmt2->bind_result($r2_logid,$r2_trackingnumber,$r2_ts,$r2_remarks,$r2_user,$r2_uid,$r2_fullname,$r2_department,$r2_section);
+        ?>
+        <h1>Document Log</h1>
+        <table data-role='table' class='ui-responsive table-stripe ui-body-a ui-shadow'>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Remarks</th>
+              <th>Staff</th>
+              <th>Department</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+            while($stmt2->fetch())
+            {
+              ?>
+                <tr>
+                  <td><?php echo $r2_ts;?></td>
+                  <td><?php echo $r2_remarks;?></td>
+                  <td><?php echo $r2_fullname." (".$r2_uid.")";?></td>
+                  <td><?php echo $r2_department." (".$r2_section.")";?></td>
+                </tr>
+              <?php
+            }
+          ?>
+          </tbody>
+        </table>
+          <?php
+          $stmt2->close();
+        }
+      }
+      $stmt->close();
+    }
+  endif;
 }
 ?>

@@ -30,4 +30,20 @@
   #tbluserinfo{
     
   }
+  
+  .controlgroup-textinput, .controlgroup-textinput .ui-input-clear{
+      padding-top:.22em;
+      padding-bottom:.22em;
+  }
+  
+  #searchform{
+    text-align: center;
+  }
+  
+  .documenttableinfo tr td:first-child:after, #tbluserinfo tr td:first-child:after{
+    content: ":";
+  }
+  .documenttableinfo tr td:first-child, #tbluserinfo tr td:first-child{
+    font-weight: bold;
+  }
 }
