@@ -117,6 +117,7 @@ displayNotification();
 ?>
         <form action="./" method="get">
             <div data-role="controlgroup" data-type="horizontal" id="searchform">
+              <label for="q" class="ui-hidden-accessible">Search for Tracking Number</label>
                     <input type="search" name="q" id="q" placeholder="Enter Tracking Number" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
                     <input type="submit" data-icon="search" value="Search" data-iconpos="notext"/>
                 </div>
@@ -258,6 +259,28 @@ function getSearchResult()
                   </tr>
                 </tbody>
               </table>
+              <?php
+              if(isset($_SESSION['uid'])):
+              ?>
+                <a href="#receiveDialog<?php echo $r_trackingnumber; ?>" data-role="button" data-inline="true" data-icon="arrow-d" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
+                <div data-role="popup" id="receiveDialog<?php echo $r_trackingnumber; ?>" data-dismissible="false" data-overlay-theme="b">
+                  <header data-role="header">
+                    <h1>Receive Document</h1>
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+                  </header>
+                  <div role="main" class="ui-content">
+                    <h3>Tracking #: <?php printf("%08d",$r_trackingnumber); ?></h3>
+                    <form action="./receive" method="post">
+                      <label for="txtremarks" class="ui-hidden-accessible">Remarks</label>
+                      <textarea name="txtremarks" id="txtremarks" placeholder="Remarks"></textarea>
+                      <input type="hidden" name="trackingnumber" value="<?php printf("%08d",$r_trackingnumber); ?>"/>
+                      <input type="submit" value="Receive" data-icon="arrow-d"/>
+                    </form>
+                  </div>
+                </div>
+              <?php
+              endif;
+              ?>
           </div>
         <?php
           global $conn;

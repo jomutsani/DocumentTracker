@@ -23,9 +23,9 @@
   .notification{
     
   }
-  .notif0{}
+  .notif0 a{background-color: #CDFFCF !important;}
   .notif1 a{background-color: #FF9 !important;}
-  .notif2 a{background-color: #F99 !important;}
+  .notif2 a{background-color: #FCC !important;}
   #notif{margin:0px;}
   #tbluserinfo{
     
