@@ -1,73 +1,86 @@
 <?php
+//Initialize script
 require_once 'functions.php';
 session_start();
+
+//If the page is the default page, name it dashboard
 $_GET['page']=(isset($_GET['page'])?$_GET['page']:"dashboard");
+
+//If session is active
 if(isset($_SESSION['uid'])):
-  dbConnect();
+  dbConnect();  //connect to database
+
+  //Branching logic for page identification
   switch ($_GET['page']):
-  case 'logout':
-    session_destroy();
-    setNotification("Successfully logged out.");
-    header("Location: ./");
-    break;
+    
+    case 'logout':
+      session_destroy();
+      setNotification("Successfully logged out.");
+      header("Location: ./");
+      break;
 
-  case 'add':
+    case 'add':
       getHTMLPageHeader();
-?>
-    <header><h1>Add Document</h1></header>
-    <article>
-    <form action="./adddoc" method="post" data-ajax="false">
-        <label for="documentnumber">Document Number</label>
-        <input type="text" name="documentnumber" id="documentnumber"/>
+      ?>
+        <header><h1>Add Document</h1></header>
+        <article>
+        <form action="./adddoc" method="post" data-ajax="false">
+            <label for="documentnumber">Document Number</label>
+            <input type="text" name="documentnumber" id="documentnumber"/>
 
-        <label for="remarks">Remarks</label>
-        <input type="text" name="remarks" id="remarks"/>
+            <label for="remarks">Remarks</label>
+            <input type="text" name="remarks" id="remarks"/>
 
-        <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
+            <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
 
-    </form>
-    </article>
-<?php
-    getHTMLPageFooter();
-    break;
+        </form>
+        </article>
+      <?php
+      getHTMLPageFooter();
+      break;
 
-  case 'adddoc':
-        global $conn;
-        $stmt=$conn->prepare("INSERT INTO document(documentnumber,remarks,author) VALUES(?,?,?)");
-        if($stmt === false) {
-          trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-        }
-        $userid=(isset($_SESSION['id'])?$_SESSION['id']:0);
-        $stmt->bind_param('ssi',$_POST['documentnumber'],$_POST['remarks'],$userid);
-        $stmt->execute();
-        $trackno = $stmt->insert_id;
-        
-        $stmt=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
-        if($stmt === false) {
-          trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-        }
-        $userid=(isset($_SESSION['id'])?$_SESSION['id']:0);
-        $stmt->bind_param('isi',$trackno,"Document received at ".$_SESSION['department']." (".$_SESSION['section']."). Document Remarks: ".$_POST['remarks'],$userid);
-        $stmt->execute();
-        
-        writeLog("Document ".$trackno." has been added by ".$_SESSION['fullname']."(".$_SESSION['uid'].").");
-        header("Location: ./");
-        break;
-?>
-<?php
+    case 'adddoc':
+      global $conn;
+      $stmt=$conn->prepare("INSERT INTO document(documentnumber,remarks,author) VALUES(?,?,?)");
+      if($stmt === false) {
+        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+      }
+      $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
+      $stmt->bind_param('ssi',$_POST['documentnumber'],$_POST['remarks'],$userid);
+      $stmt->execute();
+      $trackno = $stmt->insert_id;
+
+      $stmt=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
+      if($stmt === false) {
+        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+      }
+      $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
+      $stmt->bind_param('isi',$trackno,"Document received at ".$_SESSION['department']." (".$_SESSION['section']."). Document Remarks: ".$_POST['remarks'],$userid);
+      $stmt->execute();
+
+      writeLog("Document ".$trackno." has been added by ".$_SESSION['fullname']."(".$_SESSION['uid'].").");
+      header("Location: ./");
+      break;
+      ?>
+      <?php
+    
+    case 'search':
+      
+      break;
+    
     default :
       getHTMLPageHeader(); 
       echo "<h1>".$_SERVER["QUERY_STRING"]."</h1>";
-?>
+      ?>
 
-<?php
+      <?php
       getHTMLPageFooter();
-  endswitch;
-  dbClose();
+    endswitch;
+    dbClose();
 elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
   global $conn;
   dbConnect();
-  $stmt=$conn->prepare("SELECT id, uid, fullname, department, section FROM user WHERE uid=? AND password=?");
+  $stmt=$conn->prepare("SELECT uid, fullname, department, section FROM user WHERE uid=? AND password=?");
   if($stmt === false) {
     trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
   }
@@ -77,7 +90,7 @@ elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
   echo $stmt->num_rows;
   if($stmt->num_rows==1)
   {
-    $stmt->bind_result($_SESSION['id'],$_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
+    $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
     while($stmt->fetch()){}
     writeLog($_SESSION['fullname']."(".$_SESSION['uid'].") logged in to the system.");
   }
