@@ -2,138 +2,156 @@
 //Initialize script
 require_once 'functions.php';
 session_start();
+global $systempage;
+$systempage=(is_null(filter_input(INPUT_GET, "page"))?"dashboard":filter_input(INPUT_GET, "page"));
 
-//If the page is the default page, name it dashboard
-$_GET['page']=(isset($_GET['page'])?$_GET['page']:"dashboard");
+if(!is_null($systempage))
+{
+    switch($systempage)
+    {
+        case "login":
+            global $conn;
+            dbConnect();
+            $stmt=$conn->prepare("SELECT uid, fullname, department, section FROM user WHERE uid=? AND password=?");
+            if($stmt === false) {
+                trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+            }
+            $postusername=filter_input(INPUT_POST, "uid");
+            $postpassword=md5(filter_input(INPUT_POST, "password"));
+            $stmt->bind_param('is',$postusername,$postpassword);
+            $stmt->execute();
+            $stmt->store_result();
+            if($stmt->num_rows==1)
+            {
+                $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
+                while($stmt->fetch()){}
+                writeLog($_SESSION["fullname"]."(".$_SESSION["uid"].") logged in to the system.");
+            }
+            else
+            {
+                setNotification("Wrong ID Number and/or password.",DT_NOTIF_ERROR);
+            }
+            $stmt->close();
+            dbClose();
+            header("Location:".urldecode(filter_input(INPUT_POST, "lasturl")));
+            break;
+        case "logout":
+            session_destroy();
+            setNotification("Successfully logged out.");
+            header("Location: ./");
+            break;
+        case "add":
+            if(isLoggedIn())
+            {
+                displayHTMLPageHeader();?>
+                <header><h1>Add Document</h1></header>
+                <article>
+                <form action="./adddoc" method="post" data-ajax="false">
+                    <label for="documentnumber">Document Number</label>
+                    <input type="text" name="documentnumber" id="documentnumber"/>
 
-//If session is active
-if(isset($_SESSION['uid'])):
-  dbConnect();  //connect to database
+                    <label for="remarks">Remarks</label>
+                    <input type="text" name="remarks" id="remarks"/>
 
-  //Branching logic for page identification
-  switch ($_GET['page']):
-    
-    case 'logout':
-      session_destroy();
-      setNotification("Successfully logged out.");
-      header("Location: ./");
-      break;
+                    <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
+                </form>
+                </article>
+                <?php displayHTMLPageFooter();
+            }else{header("Location: ./");}
+            break;
+        case "adddoc":
+            if(isLoggedIn())
+            {
+                global $conn;
+                dbConnect();
+                $stmt=$conn->prepare("INSERT INTO document(documentnumber,remarks,author) VALUES(?,?,?)");
+                if($stmt === false) {
+                    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                }
+                $userid=(isLoggedIn()?$_SESSION["uid"]:0);
+                $postdocnumber=filter_input(INPUT_POST, "documentnumber");
+                $postremarks=filter_input(INPUT_POST, "remarks");
+                $stmt->bind_param('ssi',$postdocnumber,$postremarks,$userid);
+                $stmt->execute();
+                $trackno = $stmt->insert_id;
+                $stmt->close();
 
-    case 'add':
-      getHTMLPageHeader();
-      ?>
-        <header><h1>Add Document</h1></header>
-        <article>
-        <form action="./adddoc" method="post" data-ajax="false">
-            <label for="documentnumber">Document Number</label>
-            <input type="text" name="documentnumber" id="documentnumber"/>
+                $stmt2=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
+                if($stmt2 === false) {
+                    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                }
+                $msgremarks="Document received at ".$_SESSION["department"]." (".$_SESSION["section"]."). Document Remarks: ".filter_input(INPUT_POST, "remarks");
+                $stmt2->bind_param('isi',$trackno,$msgremarks,$userid);
+                $stmt2->execute();
+                $stmt->close();
 
-            <label for="remarks">Remarks</label>
-            <input type="text" name="remarks" id="remarks"/>
+                setNotification("Document was successfully added. Tracking number is <strong>".str_pad($trackno,8,"0",STR_PAD_LEFT)."</strong>.");
+                writeLog("Document ".$trackno." has been added by ".$_SESSION["fullname"]."(".$_SESSION["uid"].").");
+                dbClose();
+                header("Location: ./?q=".$trackno);
+            }else{header("Location: ./");}
+            break;
+        case "receive":
+            if(isLoggedIn())
+            {
+                if(!is_null(filter_input(INPUT_POST, "trackingnumber")))
+                {
+                    global $conn;
+                    dbConnect();
+                    $stmt=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
+                    if($stmt === false) {
+                        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                    }
+                    $userid=(isLoggedIn()?$_SESSION["uid"]:0);
+                    $posttrackingnumber=  filter_input(INPUT_POST, "trackingnumber");
+                    $posttxtremarks=  filter_input(INPUT_POST, "txtremarks");
+                    $stmt->bind_param('isi',$posttrackingnumber,$posttxtremarks,$userid);
+                    $stmt->execute();
 
-            <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
+                    setNotification("Document ".filter_input(INPUT_POST, "trackingnumber")."'s status has been updated.");
+                    writeLog("Document ".filter_input(INPUT_POST, "trackingnumber")." was received at ".$_SESSION["department"]." (".$_SESSION["section"].").");
+                    dbClose();
+                    header("Location: ./?q=".filter_input(INPUT_POST, "trackingnumber"));
+                }
+                else
+                {
+                    header("Location: ./");
+                }
+            }else{header("Location: ./");}
+            break;
+        case "regform":
+            if(isLoggedIn())
+            {
+                displayHTMLPageHeader();?>
+                <header><h1>User Registration</h1></header>
+                <article>
+                <form action="./regUser" method="post" data-ajax="false">
+                    <label for="uid">Employee ID Number</label>
+                    <input type="text" name="uid" id="uid"/>
 
-        </form>
-        </article>
-      <?php
-      getHTMLPageFooter();
-      break;
+                    <label for="fullname">Full Name</label>
+                    <input type="text" name="fullname" id="fullname"/>
+                    
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password"/>
+                    
+                    <label for="password2">Confirm Password</label>
+                    <input type="password" name="password2" id="password2"/>
+                    
+                    <label for="department">Department</label>
+                    <input type="text" name="department" id="department"/>
+                    
+                    <label for="section">Section</label>
+                    <input type="text" name="section" id="section"/>
 
-    case 'adddoc':
-      global $conn;
-      $stmt=$conn->prepare("INSERT INTO document(documentnumber,remarks,author) VALUES(?,?,?)");
-      if($stmt === false) {
-        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-      }
-      $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
-      $stmt->bind_param('ssi',$_POST['documentnumber'],$_POST['remarks'],$userid);
-      $stmt->execute();
-      $trackno = $stmt->insert_id;
-
-      $stmt=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
-      if($stmt === false) {
-        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-      }
-      $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
-      $msgremarks="Document received at ".$_SESSION['department']." (".$_SESSION['section']."). Document Remarks: ".$_POST['remarks'];
-      $stmt->bind_param('isi',$trackno,$msgremarks,$userid);
-      $stmt->execute();
-
-      setNotification("Document was successfully added. Tracking number is <strong>".str_pad($trackno,8,"0",STR_PAD_LEFT)."</strong>.");
-      writeLog("Document ".$trackno." has been added by ".$_SESSION['fullname']."(".$_SESSION['uid'].").");
-      header("Location: ./?q=".$trackno);
-      break;
-      ?>
-      <?php
-    
-    case 'receive':
-      if(isset($_POST['trackingnumber']))
-      {
-        $stmt=$conn->prepare("INSERT INTO documentlog(trackingnumber,remarks,user) VALUES(?,?,?)");
-        if($stmt === false) {
-          trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-        }
-        $userid=(isset($_SESSION['uid'])?$_SESSION['uid']:0);
-        $stmt->bind_param('isi',$_POST['trackingnumber'],$_POST['txtremarks'],$userid);
-        $stmt->execute();
-
-        setNotification("Document ".$_POST['trackingnumber']."'s status has been updated.");
-        writeLog("Document ".$_POST['trackingnumber']." was received at ".$_SESSION['department']." (".$_SESSION['section'].").");
-        header("Location: ./");
-      }
-      else
-      {
-        header("Location: ./");
-      }
-      break;
-    
-    default :
-      getHTMLPageHeader(); 
-      ?>
-
-      <?php
-      getHTMLPageFooter();
-    endswitch;
-    dbClose();
-elseif((isset($_GET['page'])) && ($_GET['page']=='login')):
-  global $conn;
-  dbConnect();
-  $stmt=$conn->prepare("SELECT uid, fullname, department, section FROM user WHERE uid=? AND password=?");
-  if($stmt === false) {
-    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
-  }
-  $stmt->bind_param('is',$_POST['uid'],$_POST['password']);
-  $stmt->execute();
-  $stmt->store_result();
-  if($stmt->num_rows==1)
-  {
-    $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
-    while($stmt->fetch()){}
-    writeLog($_SESSION['fullname']."(".$_SESSION['uid'].") logged in to the system.");
-  }
-  else
-  {
-    setNotification("Wrong ID Number and/or password.",DT_NOTIF_ERROR);
-  }
-  $stmt->close();
-  dbClose();
-  header("Location:".urldecode($_POST['lasturl']));
-else:
-  getHTMLPageHeader();
-?>
-<div class="loginpage">
-  <div class="ui-block-a">
-<?php
-  //getLoginPage();
-?>
-  </div>
-  <div class="ui-block-b">
-    <div class="ui-body">
-      <p>Track and trace the documents at the tip of your fingers.</p>
-    </div>
-  </div>
-</div> 
-<?php  
-  getHTMLPageFooter();
-endif;
-?>
+                    <input type="submit" value="Register" data-icon="edit" data-ajax="false"/>
+                </form>
+                </article>
+                <?php displayHTMLPageFooter();
+            }else{header("Location: ./");}
+            break;
+        default :
+            displayHTMLPageHeader();
+            displayHTMLPageFooter();
+    }
+}
