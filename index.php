@@ -12,7 +12,7 @@ if(!is_null($systempage))
         case "login":
             global $conn;
             dbConnect();
-            $stmt=$conn->prepare("SELECT uid, fullname, department, section FROM user WHERE uid=? AND password=?");
+            $stmt=$conn->prepare("SELECT uid, fullname, department, section, permission+0 FROM user WHERE uid=? AND password=?");
             if($stmt === false) {
                 trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
             }
@@ -23,8 +23,9 @@ if(!is_null($systempage))
             $stmt->store_result();
             if($stmt->num_rows==1)
             {
-                $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section']);
+                $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section'], $_SESSION['permission']);
                 while($stmt->fetch()){}
+                $_SESSION['permlist']=  parsePermission($_SESSION['permission']);
                 writeLog($_SESSION["fullname"]."(".$_SESSION["uid"].") logged in to the system.");
             }
             else
@@ -41,7 +42,7 @@ if(!is_null($systempage))
             header("Location: ./");
             break;
         case "add":
-            if(isLoggedIn())
+            if(isLoggedIn() && checkPermission(DT_PERM_ADDDOC))
             {
                 displayHTMLPageHeader();?>
                 <header><h1>Add Document</h1></header>
@@ -60,7 +61,7 @@ if(!is_null($systempage))
             }else{header("Location: ./");}
             break;
         case "adddoc":
-            if(isLoggedIn())
+            if(isLoggedIn() && checkPermission(DT_PERM_ADDDOC))
             {
                 global $conn;
                 dbConnect();
@@ -92,7 +93,7 @@ if(!is_null($systempage))
             }else{header("Location: ./");}
             break;
         case "receive":
-            if(isLoggedIn())
+            if(isLoggedIn() && checkPermission(DT_PERM_RECEIVEDOC))
             {
                 if(!is_null(filter_input(INPUT_POST, "trackingnumber")))
                 {
@@ -120,34 +121,63 @@ if(!is_null($systempage))
             }else{header("Location: ./");}
             break;
         case "regform":
-            if(isLoggedIn())
+            if(isLoggedIn() && checkPermission(DT_PERM_USERMGMNT))
             {
                 displayHTMLPageHeader();?>
                 <header><h1>User Registration</h1></header>
                 <article>
-                <form action="./regUser" method="post" data-ajax="false">
+                <form action="./reguser" method="post" data-ajax="false">
                     <label for="uid">Employee ID Number</label>
-                    <input type="text" name="uid" id="uid"/>
+                    <input type="number" name="uid" id="uid" required="true"/>
 
                     <label for="fullname">Full Name</label>
-                    <input type="text" name="fullname" id="fullname"/>
+                    <input type="text" name="fullname" id="fullname" required="true"/>
                     
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password"/>
+                    <input type="password" name="password" id="password" required="true" onchange="$('#password2').prop('pattern',this.value);"/>
                     
                     <label for="password2">Confirm Password</label>
-                    <input type="password" name="password2" id="password2"/>
+                    <input type="password" name="password2" id="password2" required="true"/>
                     
                     <label for="department">Department</label>
-                    <input type="text" name="department" id="department"/>
+                    <input type="text" name="department" id="department" required="true"/>
                     
                     <label for="section">Section</label>
-                    <input type="text" name="section" id="section"/>
+                    <input type="text" name="section" id="section" required="true"/>
 
                     <input type="submit" value="Register" data-icon="edit" data-ajax="false"/>
                 </form>
                 </article>
                 <?php displayHTMLPageFooter();
+            }else{header("Location: ./");}
+            break;
+        case "reguser":
+            if(isLoggedIn() && checkPermission(DT_PERM_USERMGMNT))
+            {
+                if(!is_null(filter_input(INPUT_POST, "uid")))
+                {
+                    global $conn;
+                    dbConnect();
+                    $stmt=$conn->prepare("INSERT INTO user(uid,password,fullname,department,section) VALUES(?,?,?,?,?)");
+                    if($stmt === false) {
+                        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                        break;
+                    }
+                    $userid=(isLoggedIn()?$_SESSION["uid"]:0);
+                    $posttrackingnumber=  filter_input(INPUT_POST, "trackingnumber");
+                    $posttxtremarks=  filter_input(INPUT_POST, "txtremarks");
+                    $stmt->bind_param('isi',$posttrackingnumber,$posttxtremarks,$userid);
+                    $stmt->execute();
+
+                    setNotification("Document ".filter_input(INPUT_POST, "trackingnumber")."'s status has been updated.");
+                    writeLog("Document ".filter_input(INPUT_POST, "trackingnumber")." was received at ".$_SESSION["department"]." (".$_SESSION["section"].").");
+                    dbClose();
+                    header("Location: ./?q=".filter_input(INPUT_POST, "trackingnumber"));
+                }
+                else
+                {
+                    header("Location: ./");
+                }
             }else{header("Location: ./");}
             break;
         default :

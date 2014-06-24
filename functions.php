@@ -11,6 +11,13 @@ define('DT_DB_PASSWORD', "P@ssw00rd");
 define('DT_DB_NAME', "documenttracker");
 define('DT_LOG_NAME',"DocumentTracker");
 define('DT_PAGE_TITLE',"Document Tracker");
+define('DT_PERMISSION_COUNT', 6);
+define('DT_PERM_ADDDOC',0);
+define('DT_PERM_EDITDOC',1);
+define('DT_PERM_RECEIVEDOC',2);
+define('DT_PERM_EDITDOCTRACK',3);
+define('DT_PERM_USERMGMNT',4);
+define('DT_PERM_AUDITLOG',5);
 
 function displayUserInfo()
 {?>
@@ -23,7 +30,7 @@ function displayUserInfo()
             <thead>
               <tr>
                 <th></th>
-                <th></th>
+                <th><?php print_r($_SESSION['permlist']); ?></th>
               </tr>
             </thead>
             <tbody>
@@ -95,10 +102,9 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
         ?>
           <div data-role="navbar">
               <ul>
-                  <li><a href="./add" data-icon="plus">Add Document</a></li>
-                  <li><a href="#" data-icon="bullets">Update Document Log</a></li>
-                  <li><a href="./regform" data-icon="edit">Register User</a></li>
-                  <li><a href="#" data-icon="eye">Audit Log</a></li>
+                  <?php if(checkPermission(DT_PERM_ADDDOC)): ?><li><a href="./add" data-icon="plus">Add Document</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_USERMGMNT)): ?><li><a href="./regform" data-icon="edit">User Management</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_AUDITLOG)): ?><li><a href="#" data-icon="eye">Audit Log</a></li><?php endif;?>
               </ul>
           </div>
         <?php
@@ -112,7 +118,7 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
             <form action="./" method="get">
                 <div data-role="controlgroup" data-type="horizontal" id="searchform">
                   <label for="q" class="ui-hidden-accessible">Search for Tracking Number</label>
-                        <input type="search" name="q" id="q" placeholder="Enter Tracking Number" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
+                  <input type="search" name="q" id="q" placeholder="Enter Tracking Number" autofocus="true" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
                         <input type="submit" data-icon="search" value="Search" data-iconpos="notext"/>
                     </div>
             </form>
@@ -251,7 +257,7 @@ function displaySearchResult()
                 </tbody>
               </table>
               <?php
-              if(isLoggedIn()):
+              if(isLoggedIn() && checkPermission(DT_PERM_RECEIVEDOC)):
               ?>
                 <a href="#receiveDialog<?php echo $r_trackingnumber; ?>" data-role="button" data-inline="true" data-icon="arrow-d" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
                 <div data-role="popup" id="receiveDialog<?php echo $r_trackingnumber; ?>" data-dismissible="false" data-overlay-theme="b">
@@ -323,5 +329,14 @@ function displaySearchResult()
 function isLoggedIn()
 {
     return (isset($_SESSION['uid'])?true:false);
+}
+
+function parsePermission($p){
+    return str_split(strrev(str_pad(decbin($p), DT_PERMISSION_COUNT, "0", STR_PAD_LEFT)));
+}
+
+function checkPermission($p)
+{
+    return (isset($_SESSION['permlist'])?(($_SESSION['permlist'][$p]=="1")?true:false):false);
 }
 ?>
