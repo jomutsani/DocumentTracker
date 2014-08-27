@@ -247,7 +247,7 @@ function displaySearchResult()
                 <thead>
                   <tr>
                     <th></th>
-                    <th><?php print_r($_SESSION['permission']); ?></th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
