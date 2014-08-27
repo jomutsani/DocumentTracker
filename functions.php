@@ -30,7 +30,7 @@ function displayUserInfo()
             <thead>
               <tr>
                 <th></th>
-                <th><?php print_r($_SESSION['permlist']); ?></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -38,6 +38,10 @@ function displayUserInfo()
               <td>ID Number</td>
               <td><?php echo $_SESSION['uid']; ?></td>
             </tr>
+            <tr>
+                <td>Full Name</td>
+                <td><?php echo $_SESSION['fullname']; ?></td>
+              </tr>
             <tr>
               <td>Department</td>
               <td><?php echo $_SESSION['department']; ?></td>
@@ -86,9 +90,20 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
         <link rel="stylesheet" href="./css/jquery.mobile.icons-1.4.2.min.css" />
         <link rel="stylesheet" href="./css/jquery.mobile.inline-png-1.4.2.min.css" />
         <link rel="stylesheet" href="./css/jquery.mobile.inline-svg-1.4.2.min.css" />
+        
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/media/css/jquery.dataTables_themeroller.min.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/integration/bootstrap/bin/bootstrap.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/integration/bootstrap/bin/dataTables.bootstrap.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/extensions/TableTools/css/dataTables.tableTools.min.css" />
+        
         <link rel="stylesheet" href="./css/default.css" />
         <script src="./js/jquery-2.1.1.min.js"></script>
         <script src="./js/jquery.mobile-1.4.2.min.js"></script>
+        
+        <script src="./plugin/DataTables-1.10.0/media/js/jquery.dataTables.js"></script>
+        <script src="./plugin/DataTables-1.10.0/integration/bootstrap/bin/dataTables.bootstrap.js"></script>
+        <script src="./plugin/DataTables-1.10.0/extensions/TableTools/js/dataTables.tableTools.min.js"></script>
+        
         <script src="./js/default.js"></script>
       </head>
       <body>
@@ -115,13 +130,15 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
         <?php
             displayNotification();
         ?>
-            <form action="./" method="get">
-                <div data-role="controlgroup" data-type="horizontal" id="searchform">
-                  <label for="q" class="ui-hidden-accessible">Search for Tracking Number</label>
-                  <input type="search" name="q" id="q" placeholder="Enter Tracking Number" autofocus="true" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
-                        <input type="submit" data-icon="search" value="Search" data-iconpos="notext"/>
-                    </div>
-            </form>
+            <div class="ui-body ui-body-a ui-corner-all">
+                <form action="./" method="get">
+                    <div data-role="controlgroup" data-type="horizontal" id="searchform">
+                      <label for="q" class="ui-hidden-accessible">Search for Tracking Number</label>
+                      <input type="search" name="q" id="q" placeholder="Enter Tracking Number" autofocus="true" data-wrapper-class="controlgroup-textinput ui-btn" value="<?php echo (isset($_GET['q'])?$_GET['q']:""); ?>"/>
+                            <input type="submit" data-icon="search" value="Search" data-iconpos="notext"/>
+                        </div>
+                </form>
+            </div>
         <?php
         displaySearchResult();
 }
@@ -335,8 +352,11 @@ function parsePermission($p){
     return str_split(strrev(str_pad(decbin($p), DT_PERMISSION_COUNT, "0", STR_PAD_LEFT)));
 }
 
-function checkPermission($p)
+function checkPermission($p,$a=NULL)
 {
-    return (isset($_SESSION['permlist'])?(($_SESSION['permlist'][$p]=="1")?true:false):false);
+    if(is_null($a)){
+        $a=$_SESSION['permlist'];
+    }
+    return (isset($a)?(($a[$p]=="1")?true:false):false);
 }
 ?>

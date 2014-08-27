@@ -6,6 +6,11 @@
   .loginpage .ui-block-b{
     width: 67%;
   }
+  
+    div.dataTables_filter label{
+        display: none;
+    }
+    
   .custom-corners .ui-bar {
     -webkit-border-top-left-radius: inherit;
     border-top-left-radius: inherit;

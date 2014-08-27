@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 25, 2014 at 09:56 AM
+-- Generation Time: Aug 27, 2014 at 07:59 AM
 -- Server version: 5.5.38
 -- PHP Version: 5.4.29
 
@@ -22,7 +22,7 @@ USE `documenttracker`;
 -- Table structure for table `auditlog`
 --
 -- Creation: Jun 24, 2014 at 03:15 AM
--- Last update: Jun 25, 2014 at 08:51 AM
+-- Last update: Aug 27, 2014 at 06:52 AM
 --
 
 DROP TABLE IF EXISTS `auditlog`;
@@ -33,7 +33,7 @@ CREATE TABLE `auditlog` (
   `user` int(4) unsigned zerofill NOT NULL COMMENT 'User',
   `page` varchar(100) NOT NULL COMMENT 'Page Name',
   `msg` varchar(512) NOT NULL COMMENT 'Message'
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Audit Log' AUTO_INCREMENT=41 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Audit Log' AUTO_INCREMENT=69 ;
 
 --
 -- Truncate table before insert `auditlog`
@@ -84,7 +84,35 @@ INSERT INTO `auditlog` (`id`, `ts`, `type`, `user`, `page`, `msg`) VALUES
 (37, '2014-06-25 08:20:36', 'Info', 0000, 'login', 'Administrator(0) logged in to the system.'),
 (38, '2014-06-25 08:21:09', 'Info', 0000, 'receive', 'Document 00000001 was received at IPHO (QMC).'),
 (39, '2014-06-25 08:33:33', 'Info', 3597, 'login', 'System Admin(3597) logged in to the system.'),
-(40, '2014-06-25 08:51:33', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.');
+(40, '2014-06-25 08:51:33', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(41, '2014-06-26 03:43:22', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(42, '2014-07-02 02:15:02', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(43, '2014-07-31 03:02:15', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(44, '2014-07-31 03:46:43', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(45, '2014-07-31 03:47:35', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(46, '2014-07-31 03:48:06', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(47, '2014-07-31 03:49:58', 'Info', 3597, 'login', 'System Admin(3597) logged in to the system.'),
+(48, '2014-07-31 03:50:27', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(49, '2014-07-31 03:54:32', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(50, '2014-07-31 03:54:56', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(51, '2014-07-31 03:55:05', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(52, '2014-07-31 03:56:06', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(53, '2014-07-31 07:20:23', 'Info', 3597, 'reguser', 'User System Adminz(3597) has been registered.'),
+(54, '2014-07-31 07:23:27', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(55, '2014-07-31 07:24:02', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(56, '2014-07-31 07:24:20', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(57, '2014-07-31 07:25:19', 'Info', 3597, 'reguser', 'User System Adminz(3597) has been registered.'),
+(58, '2014-07-31 07:26:12', 'Info', 3597, 'reguser', 'User System Adminz(3597) has been registered.'),
+(59, '2014-07-31 07:36:00', 'Info', 3597, 'edituser', 'User System Administrator(3597) has been updated to Name=System Administrator, Dept=PICTOz, Section=Medixz, Perm=55, Password=74df9ed7b79cfcbca84002619b670802'),
+(60, '2014-07-31 07:36:43', 'Info', 3597, 'edituser', 'User System Administrator(3597) has been updated to Name=System Administrator, Dept=PICTOz, Section=Medixz, Perm=55'),
+(61, '2014-07-31 07:38:07', 'Info', 3597, 'edituser', 'User System Administrator(3597) has been updated to Name=System Administrator, Dept=PICTO, Section=Medix, Perm=63, Password=21232f297a57a5a743894a0e4a801fc3'),
+(62, '2014-07-31 07:38:46', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(63, '2014-07-31 07:43:27', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(64, '2014-07-31 07:44:08', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(65, '2014-07-31 07:44:34', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(66, '2014-07-31 07:44:53', 'Info', 3597, 'users', 'System Admin(3597) logged in to the system.'),
+(67, '2014-08-27 06:49:25', 'Info', 0001, 'users', 'System Admin(1) logged in to the system.'),
+(68, '2014-08-27 06:52:36', 'Info', 3597, 'login', 'System Administrator(3597) logged in to the system.');
 
 -- --------------------------------------------------------
 
@@ -162,7 +190,7 @@ INSERT INTO `documentlog` (`logid`, `trackingnumber`, `ts`, `remarks`, `user`) V
 -- Table structure for table `user`
 --
 -- Creation: Jun 25, 2014 at 08:19 AM
--- Last update: Jun 25, 2014 at 08:19 AM
+-- Last update: Jul 31, 2014 at 07:38 AM
 --
 
 DROP TABLE IF EXISTS `user`;
@@ -186,7 +214,7 @@ TRUNCATE TABLE `user`;
 --
 
 INSERT INTO `user` (`uid`, `password`, `fullname`, `department`, `section`, `regdate`, `permission`) VALUES
-(3597, '21232f297a57a5a743894a0e4a801fc3', 'System Admin', 'PICTO', 'Medix', '2014-06-21 23:48:59', 63),
+(3597, '21232f297a57a5a743894a0e4a801fc3', 'System Administrator', 'PICTO', 'Medix', '2014-06-21 23:48:59', 63),
 (0000, 'f6fdffe48c908deb0f4c3bd36c032e72', 'Administrator', 'IPHO', 'QMC', '2014-06-25 08:02:21', 5);
 
 --
@@ -225,7 +253,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `auditlog`
 --
 ALTER TABLE `auditlog`
-MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit ID',AUTO_INCREMENT=41;
+MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit ID',AUTO_INCREMENT=69;
 --
 -- AUTO_INCREMENT for table `document`
 --
