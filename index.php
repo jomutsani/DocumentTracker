@@ -12,7 +12,7 @@ if(!is_null($systempage))
         case "login":
             global $conn;
             dbConnect();
-            $stmt=$conn->prepare("SELECT uid, fullname, department, section, permission+0 FROM user WHERE uid=? AND password=?");
+            $stmt=$conn->prepare("SELECT uid, fullname, department, division, section, permission+0 FROM user WHERE uid=? AND password=?");
             if($stmt === false) {
                 trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
             }
@@ -23,7 +23,7 @@ if(!is_null($systempage))
             $stmt->store_result();
             if($stmt->num_rows==1)
             {
-                $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['section'], $_SESSION['permission']);
+                $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['division'],$_SESSION['section'], $_SESSION['permission']);
                 while($stmt->fetch()){}
                 $_SESSION['permlist']=  parsePermission($_SESSION['permission']);
                 writeLog($_SESSION["fullname"]."(".$_SESSION["uid"].") logged in to the system.");
@@ -128,11 +128,11 @@ if(!is_null($systempage))
                     global $conn;
                     dbConnect();
                     
-                    $stmt = $conn->prepare("SELECT fullname,department,section, permission FROM user WHERE uid=?");
+                    $stmt = $conn->prepare("SELECT fullname,department, division, section, permission FROM user WHERE uid=?");
                     $stmt->bind_param("i",$uid);
                     $stmt->execute();
                     $stmt->store_result();
-                    $stmt->bind_result($fullname,$department,$section,$permission);
+                    $stmt->bind_result($fullname,$department,$division,$section,$permission);
                     if($stmt->num_rows<1){
                         setNotification("No such user exists",DT_NOTIF_ERROR);
                         header("Location: ./users");
@@ -168,8 +168,11 @@ if(!is_null($systempage))
                     <label for="department">Department</label>
                     <input type="text" name="department" id="department" required="true" <?php echo $uid?'value="'.$department.'"':''; ?> />
                     
+                    <label for="department">Division</label>
+                    <input type="text" name="division" id="division" <?php echo $uid?'value="'.$division.'"':''; ?> />
+                    
                     <label for="section">Section</label>
-                    <input type="text" name="section" id="section" required="true" <?php echo $uid?'value="'.$section.'"':''; ?> />
+                    <input type="text" name="section" id="section" <?php echo $uid?'value="'.$section.'"':''; ?> />
                     
                     <fieldset data-role="controlgroup">
                         <legend>Permissions</legend>
@@ -200,7 +203,7 @@ if(!is_null($systempage))
                 {
                     global $conn;
                     dbConnect();
-                    $stmt=$conn->prepare("INSERT INTO user(uid,password,fullname,department,section,permission) VALUES(?,?,?,?,?,?)");
+                    $stmt=$conn->prepare("INSERT INTO user(uid,password,fullname,department,section,permission) VALUES(?,?,?,?,?,?,?)");
                     if($stmt === false) {
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
@@ -210,14 +213,15 @@ if(!is_null($systempage))
                     $password=md5(filter_input(INPUT_POST, "password"));
                     $fullname=filter_input(INPUT_POST, "fullname");
                     $department=filter_input(INPUT_POST, "department");
+                    $division=filter_input(INPUT_POST, "division");
                     $section=filter_input(INPUT_POST, "section");
-                    $pcount=filter_input(INPUT_POST, "p");
+                    $pcount=filter_input_array(INPUT_POST, "p");
                     $permission=0;
                     while(list($key,$val)=@each($pcount)) {
                         $permission += intval($val);
                     }
                     
-                    $stmt->bind_param('issssi',$uid,$password,$fullname,$department,$section,$permission);
+                    $stmt->bind_param('isssssi',$uid,$password,$fullname,$department,$division,$section,$permission);
                     $stmt->execute();
 
                     setNotification("User ".$fullname."(".$uid.") has been registered.");
@@ -241,6 +245,7 @@ if(!is_null($systempage))
                 $password=md5(filter_input(INPUT_POST, "password"));
                 $fullname=filter_input(INPUT_POST, "fullname");
                 $department=filter_input(INPUT_POST, "department");
+                $division=filter_input(INPUT_POST, "division");
                 $section=filter_input(INPUT_POST, "section");
                 $pcount=filter_input_array(INPUT_POST)["p"];
                 $permission=0;
@@ -262,7 +267,7 @@ if(!is_null($systempage))
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
                     }
-                    $stmt->bind_param('ssssii',$fullname,$password,$department,$section,$permission,$uid);
+                    $stmt->bind_param('sssssii',$fullname,$password,$department,$division,$section,$permission,$uid);
                 }
                 $stmt->execute();
                 setNotification("User ".$fullname."(".$uid.") has been updated.");
@@ -291,7 +296,7 @@ if(!is_null($systempage))
                         <tbody>
                             <?php global $conn;
                             dbConnect();
-                            $stmt=$conn->prepare("SELECT uid, fullname, department, section FROM user");
+                            $stmt=$conn->prepare("SELECT uid, fullname, department, division, section FROM user");
                             if($stmt === false) {
                                 trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                             }
@@ -299,19 +304,19 @@ if(!is_null($systempage))
                             $stmt->store_result();
                             if($stmt->num_rows>0)
                             {
-                                $stmt->bind_result($uid,$fullname,$department,$section);
+                                $stmt->bind_result($uid,$fullname,$department,$division,$section);
                                 while($stmt->fetch()): ?>
                                 <tr>
                                     <td><?php echo $fullname; ?></td>
                                     <td><a href="./regform?id=<?php echo $uid; ?>" data-role="button" data-icon="edit">Edit</a></td>
                                 </tr>
                             <?php endwhile;
-                                $_SESSION['permlist']=  parsePermission($_SESSION['permission']);
-                                writeLog($_SESSION["fullname"]."(".$_SESSION["uid"].") logged in to the system.");
+//                                $_SESSION['permlist']=  parsePermission($_SESSION['permission']);
+//                                writeLog($_SESSION["fullname"]."(".$_SESSION["uid"].") logged in to the system.");
                             }
                             else
                             {
-                                setNotification("Wrong ID Number and/or password.",DT_NOTIF_ERROR);
+                                setNotification("No users.",DT_NOTIF_ERROR);
                             }
                             $stmt->close(); ?>
                         </tbody>
@@ -405,6 +410,36 @@ if(!is_null($systempage))
                 </script>
                 <?php displayHTMLPageFooter();
             }else{header("Location: ./");}
+            break;
+        case "reports":
+                displayHTMLPageHeader();?>
+                <header><h1>Reports</h1></header>
+                <article>
+                    <div data-role="collapsibleset" data-theme="d" data-content-theme="a" id='reportpanel' class='ui-corner-all'>
+                        <div data-role="collapsible">
+                            <h3>Documents</h3>
+                            <form action="./report?t=homeownerlist" method="post" target="_blank">
+                                <fieldset data-role="collapsible" data-theme="a" data-inset="false">
+                                    <legend>List of Documents</legend>
+                                    <input type="submit" value="Generate" data-inline="true"/>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                <form action="./report" method="post" data-ajax="false">
+                    <label for="documentnumber">Document Number</label>
+                    <input type="text" name="documentnumber" id="documentnumber"/>
+
+                    <label for="remarks">Remarks</label>
+                    <input type="text" name="remarks" id="remarks"/>
+
+                    <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
+                </form>
+                </article>
+                <?php displayHTMLPageFooter();
             break;
         default :
             displayHTMLPageHeader();

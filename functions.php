@@ -11,13 +11,14 @@ define('DT_DB_PASSWORD', "P@ssw00rd");
 define('DT_DB_NAME', "documenttracker");
 define('DT_LOG_NAME',"DocumentTracker");
 define('DT_PAGE_TITLE',"Document Tracker");
-define('DT_PERMISSION_COUNT', 6);
+define('DT_PERMISSION_COUNT', 7);
 define('DT_PERM_ADDDOC',0);
 define('DT_PERM_EDITDOC',1);
 define('DT_PERM_RECEIVEDOC',2);
 define('DT_PERM_EDITDOCTRACK',3);
 define('DT_PERM_USERMGMNT',4);
 define('DT_PERM_AUDITLOG',5);
+define('DT_PERM_REPORT',6);
 
 function displayUserInfo()
 {?>
@@ -119,7 +120,7 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
               <ul>
                   <?php if(checkPermission(DT_PERM_ADDDOC)): ?><li><a href="./add" data-icon="plus">Add Document</a></li><?php endif;?>
                   <?php if(checkPermission(DT_PERM_USERMGMNT)): ?><li><a href="./users" data-icon="edit">User Management</a></li><?php endif;?>
-                  <?php if(checkPermission(DT_PERM_AUDITLOG)): ?><li><a href="./" data-icon="eye">Audit Log</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_AUDITLOG)): ?><li><a href="./auditlog" data-icon="eye">Audit Log</a></li><?php endif;?>
               </ul>
           </div>
         <?php
@@ -299,7 +300,7 @@ function displaySearchResult()
         <?php
           global $conn;
           dbConnect();
-          $stmt2=$conn->prepare("SELECT a.*, b.uid, b.fullname, b.department, b.section FROM documentlog a INNER JOIN user b ON a.user=b.uid WHERE trackingnumber=?");
+          $stmt2=$conn->prepare("SELECT a.*, b.uid, b.fullname, b.department, b.section FROM documentlog a INNER JOIN user b ON a.user=b.uid WHERE trackingnumber=? ORDER BY a.ts DESC");
           if($stmt2 === false) {
             trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
           }
