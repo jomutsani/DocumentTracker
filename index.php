@@ -203,7 +203,7 @@ if(!is_null($systempage))
                 {
                     global $conn;
                     dbConnect();
-                    $stmt=$conn->prepare("INSERT INTO user(uid,password,fullname,department,section,permission) VALUES(?,?,?,?,?,?,?)");
+                    $stmt=$conn->prepare("INSERT INTO user(uid,password,fullname,department,division,section,permission) VALUES(?,?,?,?,?,?,?)");
                     if($stmt === false) {
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
@@ -255,14 +255,14 @@ if(!is_null($systempage))
 
                 if(filter_input(INPUT_POST, "password")=="")
                 {
-                    $stmt=$conn->prepare("UPDATE user SET fullname=?, department=?, section=?, permission=? WHERE uid=?");
+                    $stmt=$conn->prepare("UPDATE user SET fullname=?, department=?, division=?, section=?, permission=? WHERE uid=?");
                     if($stmt === false) {
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
                     }
                     $stmt->bind_param('sssii',$fullname,$department,$section,$permission,$uid);
                 }else{
-                    $stmt=$conn->prepare("UPDATE user SET fullname=?, password=?, department=?, section=?, permission=? WHERE uid=?");
+                    $stmt=$conn->prepare("UPDATE user SET fullname=?, password=?, department=?, division=?, section=?, permission=? WHERE uid=?");
                     if($stmt === false) {
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
