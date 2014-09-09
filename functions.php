@@ -114,7 +114,7 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
           <a href="./" data-icon="home" data-iconpos="notext" class="ui-btn-left">Home</a>
           <a href="#userpanel" data-icon="user" data-iconpos="notext" class="ui-btn-right">Account</a>
         <?php
-        if(isLoggedIn()):
+        if(isLoggedIn() && $_SESSION["permission"]>0):
         ?>
           <div data-role="navbar">
               <ul>
@@ -278,6 +278,7 @@ function displaySearchResult()
               if(isLoggedIn() && checkPermission(DT_PERM_RECEIVEDOC)):
               ?>
                 <a href="#receiveDialog<?php echo $r_trackingnumber; ?>" data-role="button" data-inline="true" data-icon="arrow-d" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
+                
                 <div data-role="popup" id="receiveDialog<?php echo $r_trackingnumber; ?>" data-dismissible="false" data-overlay-theme="b">
                   <header data-role="header">
                     <h1>Receive Document</h1>
@@ -296,6 +297,13 @@ function displaySearchResult()
               <?php
               endif;
               ?>
+            <?php
+                if(isLoggedIn() && checkPermission(DT_PERM_EDITDOC)):
+            ?>
+                <a href="./edit?id=<?php echo $r_trackingnumber; ?>" data-role="button" data-icon="edit" data-inline="true">Edit Document</a>
+            <?php
+                endif;
+            ?>
           </div>
         <?php
           global $conn;

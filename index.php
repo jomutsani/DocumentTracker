@@ -21,6 +21,8 @@ if(!is_null($systempage))
             $stmt->bind_param('is',$postusername,$postpassword);
             $stmt->execute();
             $stmt->store_result();
+            var_dump($postpassword);
+            var_dump($stmt->num_rows);
             if($stmt->num_rows==1)
             {
                 $stmt->bind_result($_SESSION['uid'],$_SESSION['fullname'],$_SESSION['department'],$_SESSION['division'],$_SESSION['section'], $_SESSION['permission']);
@@ -60,6 +62,47 @@ if(!is_null($systempage))
                 <?php displayHTMLPageFooter();
             }else{header("Location: ./");}
             break;
+        case "edit":
+            if(isLoggedIn() && checkPermission(DT_PERM_EDITDOC))
+            {
+                $tid = filter_input(INPUT_GET,"id");
+                if($tid){
+                    global $conn;
+                    dbConnect();
+                    
+                    $stmt = $conn->prepare("SELECT documentnumber,remarks FROM document WHERE trackingnumber=?");
+                    $stmt->bind_param("i",$tid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    $stmt->bind_result($documentnumber,$remarks);
+                    if($stmt->num_rows<1){
+                        setNotification("No such document exists",DT_NOTIF_ERROR);
+                        header("Location: ./");
+                    }
+                    while($stmt->fetch()){}
+                    $stmt->free_result();
+                    $stmt->close();
+                    
+                    dbClose();
+                }else{header("Location: ./");}
+                
+                displayHTMLPageHeader();?>
+                <header><h1>Edit Document (#<?php printf("%08d",$tid); ?>)</h1></header>
+                <article>
+                <form action="./editdoc" method="post" data-ajax="false">
+                    <input type="hidden" name="tid" value="<?php echo $tid; ?>"/>
+                    <label for="documentnumber">Document Number</label>
+                    <input type="text" name="documentnumber" id="documentnumber" value="<?php echo $documentnumber; ?>"/>
+
+                    <label for="remarks">Remarks</label>
+                    <input type="text" name="remarks" id="remarks" value="<?php echo $remarks; ?>"/>
+
+                    <input type="submit" value="Update" data-icon="refresh" data-ajax="false"/>
+                </form>
+                </article>
+                <?php displayHTMLPageFooter();
+            }else{header("Location: ./");}
+            break;
         case "adddoc":
             if(isLoggedIn() && checkPermission(DT_PERM_ADDDOC))
             {
@@ -90,6 +133,29 @@ if(!is_null($systempage))
                 writeLog("Document ".$trackno." has been added by ".$_SESSION["fullname"]."(".$_SESSION["uid"].").");
                 dbClose();
                 header("Location: ./?q=".$trackno);
+            }else{header("Location: ./");}
+            break;
+        case "editdoc":
+            if(isLoggedIn() && checkPermission(DT_PERM_EDITDOC))
+            {
+                global $conn;
+                dbConnect();
+                $stmt=$conn->prepare("UPDATE document SET documentnumber=?, remarks=? WHERE trackingnumber=?");
+                if($stmt === false) {
+                    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                }
+                $userid=(isLoggedIn()?$_SESSION["uid"]:0);
+                $postdocnumber=filter_input(INPUT_POST, "documentnumber");
+                $postremarks=filter_input(INPUT_POST, "remarks");
+                $tid=filter_input(INPUT_POST, "tid");
+                $stmt->bind_param('ssi',$postdocnumber,$postremarks,$tid);
+                $stmt->execute();
+                $stmt->close();
+
+                setNotification("Document $postdocnumber was successfully edited.");
+                writeLog("Document ".$tid." has been updated to DocNo.=$postdocnumber, Remarks=$postremarks");
+                dbClose();
+                header("Location: ./?q=".$tid);
             }else{header("Location: ./");}
             break;
         case "receive":
@@ -215,7 +281,7 @@ if(!is_null($systempage))
                     $department=filter_input(INPUT_POST, "department");
                     $division=filter_input(INPUT_POST, "division");
                     $section=filter_input(INPUT_POST, "section");
-                    $pcount=filter_input_array(INPUT_POST, "p");
+                    $pcount=filter_input_array(INPUT_POST)["p"];
                     $permission=0;
                     while(list($key,$val)=@each($pcount)) {
                         $permission += intval($val);
@@ -260,7 +326,7 @@ if(!is_null($systempage))
                         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         break;
                     }
-                    $stmt->bind_param('sssii',$fullname,$department,$section,$permission,$uid);
+                    $stmt->bind_param('ssssii',$fullname,$department,$division,$section,$permission,$uid);
                 }else{
                     $stmt=$conn->prepare("UPDATE user SET fullname=?, password=?, department=?, division=?, section=?, permission=? WHERE uid=?");
                     if($stmt === false) {
@@ -271,7 +337,7 @@ if(!is_null($systempage))
                 }
                 $stmt->execute();
                 setNotification("User ".$fullname."(".$uid.") has been updated.");
-                writeLog("User ".$fullname."(".$uid.") has been updated to Name=".$fullname.", Dept=".$department.", Section=".$section.", Perm=".$permission.(filter_input(INPUT_POST, "password")==""?"":", Password=".$password));
+                writeLog("User ".$fullname."(".$uid.") has been updated to Name=".$fullname.", Dept=".$department.", Section=".$section.", Perm=".$permission.(filter_input(INPUT_POST, "password")==""?"":", Password=****************".substr($password,16)));
                 dbClose();
                 header("Location: ./regform?id=".$uid);
             }else{header("Location: ./");}
@@ -394,7 +460,8 @@ if(!is_null($systempage))
                         ul = $('#tbllog').dataTable({
                         "processing": true,
                         "serverSide": true,
-                        "ajax": "./auditlogss"});
+                        "ajax": "./auditlogss",
+                        "order": [[0,"desc"]]});
                     
                         ulapi = ul.api();
                     
