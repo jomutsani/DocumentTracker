@@ -479,15 +479,75 @@ if(!is_null($systempage))
             }else{header("Location: ./");}
             break;
         case "reports":
+                $users="";
+                global $conn;
+                dbConnect();
+                $stmt2=$conn->prepare("SELECT uid,fullname FROM user ORDER BY fullname ASC");
+                if($stmt2 === false) {
+                    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                }
+                $stmt2->execute();
+                $stmt2->store_result();
+
+                if($stmt2->num_rows>0){
+                    $stmt2->bind_result($uid,$uname);
+                    while($stmt2->fetch()):
+                        $users .= '<option value="'.$uid.'">'.$uname.'</option>'; 
+                    endwhile;
+                }
+                $stmt2->free_result();
+                
                 displayHTMLPageHeader();?>
                 <header><h1>Reports</h1></header>
                 <article>
                     <div data-role="collapsibleset" data-theme="d" data-content-theme="a" id='reportpanel' class='ui-corner-all'>
-                        <div data-role="collapsible">
+<!--                        <div data-role="collapsible">
                             <h3>Documents</h3>
                             <form action="./report?t=homeownerlist" method="post" target="_blank">
                                 <fieldset data-role="collapsible" data-theme="a" data-inset="false">
                                     <legend>List of Documents</legend>
+                                    <input type="submit" value="Generate" data-inline="true"/>
+                                </fieldset>
+                            </form>
+                        </div>-->
+                        <div data-role="collapsible">
+                            <h3>Documents</h3>
+                            <form action="./report?t=doclist" method="post" target="_blank">
+                                <fieldset data-role="collapsible" data-theme="a" data-inset="false">
+                                    <legend>List of Documents</legend>
+                                    
+                                    <div class="ui-grid-c">
+                                        <div class="ui-block-a">
+                                            <label for="owner-filter-menu">Select User</label>
+                                            <select id="owner-filter-menu" name="owner-filter-menu" data-native-menu="false" required="true" data-inline="true">
+                                                <option value="0">All users</option>
+                                                <?php echo $users; ?>
+                                            </select>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="departmentd01">Department</label>
+                                            <input type="text" id="departmentd01" name="department" placeholder="Department"/>
+                                        </div>
+                                        <div class="ui-block-c">
+                                            <label for="divisiond01">Division</label>
+                                            <input type="text" id="divisiond01" name="division" placeholder="Division"/>
+                                        </div>
+                                        <div class="ui-block-d">
+                                            <label for="sectiond01">Section</label>
+                                            <input type="text" id="sectiond01" name="section" placeholder="Section"/>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="ui-grid-a">
+                                        <div class="ui-block-a">
+                                            <label for="startdateh01" data-inline="true">From</label>
+                                            <input type="date" data-inline="true" name="startdate" id="startdateh01" value="<?php echo date("Y-m-d"); ?>"/>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="enddateh01" data-inline="true">To</label>
+                                            <input type="date" data-inline="true" name="enddate" id="enddateh01" value="<?php echo date("Y-m-d"); ?>"/>
+                                        </div>
+                                    </div>
                                     <input type="submit" value="Generate" data-inline="true"/>
                                 </fieldset>
                             </form>
@@ -496,7 +556,7 @@ if(!is_null($systempage))
                     
                     
                     
-                <form action="./report" method="post" data-ajax="false">
+<!--                <form action="./report" method="post" data-ajax="false">
                     <label for="documentnumber">Document Number</label>
                     <input type="text" name="documentnumber" id="documentnumber"/>
 
@@ -504,9 +564,168 @@ if(!is_null($systempage))
                     <input type="text" name="remarks" id="remarks"/>
 
                     <input type="submit" value="Add" data-icon="plus" data-ajax="false"/>
-                </form>
+                </form>-->
                 </article>
                 <?php displayHTMLPageFooter();
+            break;
+        case "report":
+            if(isLoggedIn()){
+                $resultset=array();
+                $resultcolumns=array();
+                $resultfooter=null;
+                $resultclasses=array();
+                $title="";
+                $subtitle="";
+                $msg="";
+
+                global $conn;
+                dbConnect();
+
+                switch(filter_input(INPUT_GET, "t"))
+                {
+                    case "doclist":
+                        $uid=filter_input(INPUT_POST, "owner-filter-menu");
+                        $department=filter_input(INPUT_POST, "department");
+                        $division=filter_input(INPUT_POST, "division");
+                        $section=filter_input(INPUT_POST, "section");
+                        $startdate=filter_input(INPUT_POST, "startdate");
+                        $enddate=filter_input(INPUT_POST, "enddate");
+                        
+                        $title="List of Documents";
+                        $msg="";
+                        $sql="SELECT a.datecreated, a.trackingnumber, a.documentnumber,a.author,b.fullname,a.remarks FROM document a INNER JOIN user b ON a.author=b.uid WHERE a.datecreated>=? AND a.datecreated<=?";
+                        $stmt=$conn->prepare($sql);
+                        if($stmt === false) {
+                            trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                        }
+                        $resultcolumns = ["Date","Tracking No.","Document No.","User ID","Full Name","Remarks"];
+                        $resultclasses = ["","","","","",""];
+        //                $postusername=filter_input(INPUT_POST, "uid");
+        //                $postpassword=md5(filter_input(INPUT_POST, "password"));
+                        $stmt->bind_param('ss',$startdate,$enddate);
+                        $stmt->execute();
+
+                        $stmt->store_result();
+                        if($stmt->num_rows>0)
+                        {
+                            $stmt->bind_result($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks);
+                            while($stmt->fetch()){
+                                $resultset[]=array($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks);
+                            }
+                        }
+                        break;
+                }
+
+
+                $stmt->close();
+                dbClose();
+                displayPlainHTMLPageHeader($title)?>
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                rptbl=$('#tblreport').dataTable({
+                                    paging:false,
+                                    "footerCallback": function ( row, data, start, end, display ) {
+                                        var api = this.api(), data;
+
+                                        // Remove the formatting to get integer data for summation
+                                        var intVal = function ( i ) {
+                                            return typeof i === 'string' ?
+                                                i.replace(/[\$,]/g, '')*1 :
+                                                typeof i === 'number' ?
+                                                    i : 0;
+                                        };
+
+                                        // Total over all pages
+//                                        data = api.column( 4 ).data();
+//                                        total = data.length ?
+//                                            data.reduce( function (a, b) {
+//                                                    return intVal(a) + intVal(b);
+//                                            } ) :
+//                                            0;
+
+                                        // Total over this page
+                                        for(i=0; i<this.fnSettings().aoColumns.length; i++)
+                                        {
+                                            data = api.column( i, { page: 'current'} ).data();
+                                            pageTotal = data.length?(data.length===1?intVal(data[0]):data.reduce(function(a, b){return intVal(a)+intVal(b);})):0;
+                                        
+                                            // Update footer
+//                                            if($(api.column(i).footer().className)==="textamount"){
+                                                try{
+                                                    $(api.column(i).footer()).filter(".total").html(numberWithCommas(pageTotal.toFixed(2)));
+                                                }catch(e){}
+//                                            }
+                                        }
+
+                                        
+                                    }
+                                });
+                                var tableTools = new $.fn.dataTable.TableTools( rptbl, {
+                                    "buttons": [
+                                        "copy",
+                                        "csv",
+                                        "xls",
+                                        "pdf",
+                                        { "type": "print", "buttonText": "Print me!" }
+                                    ],
+                                    "sSwfPath":"./plugin/DataTables-1.10.0/extensions/TableTools/swf/copy_csv_xls_pdf.swf",
+                                    "aButtons": [
+                                        "copy",
+                                        "csv",
+                                        "xls",
+                                        {
+                                            "sExtends": "pdf",
+                                            "sPdfOrientation": "landscape",
+                                            "sPdfMessage": "<?php echo $msg; ?>"
+                                        },
+                                        "print"
+                                    ]
+                                } );
+
+                                $( tableTools.fnContainer() ).appendTo('#ttools');
+                            } );
+                        </script>
+
+                        <div class="soapage">
+                            <div id="pagetitle">
+                          <?php displayPrintHeader(); ?>
+                          <h3><?php echo $title; ?></h3>
+                          <div class="sub-title"><?php echo $subtitle; ?></div>
+                            </div>
+                          <div id="ttools"></div>
+                          <table id="tblreport" width="100%" class="display">
+                              <thead>
+                                  <tr>
+                                  <?php foreach($resultcolumns as $col): ?>
+                                    <th><?php echo $col; ?></th>
+                                  <?php endforeach; ?>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                <?php $i=0; foreach ($resultset as $row): ?>
+                                    <tr>
+                                        <?php $j=0; foreach($row as $cell): ?>
+                                            <td class="<?php echo $resultclasses[$j]; ?>"><?php echo $cell; $j++; ?></td>
+                                        <?php endforeach; $i++; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                              </tbody>
+                              <?php if(!is_null($resultfooter)): ?>
+                              <tfoot>
+                                  <tr>
+                                      <?php $i=0; foreach($resultfooter as $foot): ?>
+                                      <th class="<?php echo $resultclasses[$i]; ?>"><?php echo $foot; $i++; ?></th>
+                                      <?php endforeach; ?>
+                                  </tr>
+                              </tfoot>
+                              <?php endif; ?>
+                          </table>
+                          <footer><div class="gentimestamp">Generated on <?php date_default_timezone_set("Asia/Manila"); echo date('Y-m-d h:i:s A', time());?></div></footer>
+                        </div>
+                      </body>
+                    </html>  
+                <?php
+            }
             break;
         default :
             displayHTMLPageHeader();

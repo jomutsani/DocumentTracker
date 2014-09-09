@@ -52,3 +52,23 @@
     font-weight: bold;
   }
 }
+  header.printheader{
+      text-align:center;
+  }
+  
+  header.printheader img.headerlogo{
+      height: 4em;
+  }
+  
+  header.printheader .orgname{
+      font-weight: bold;
+      font-size: 1.5em;
+  }
+
+  #pagetitle, #tblreport_info{
+    display:block !important;
+}
+.soapage footer{
+    margin-top: 2em;
+    display: block !important;
+}

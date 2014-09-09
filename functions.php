@@ -157,6 +157,61 @@ function displayHTMLPageFooter(){
     <?php
 }
 
+function displayPlainHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
+{?>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title><?php echo $pagetitle; ?></title>
+<!--        <link rel="stylesheet" href="./css/jquery.mobile.structure-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile.theme-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile.external-png-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile.icons-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile.inline-png-1.4.2.min.css" />
+        <link rel="stylesheet" href="./css/jquery.mobile.inline-svg-1.4.2.min.css" />-->
+        <link rel="stylesheet" href="./css/reportstyle.css" />
+        
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/media/css/jquery.dataTables_themeroller.min.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/integration/bootstrap/bin/bootstrap.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/integration/bootstrap/bin/dataTables.bootstrap.css" />
+        <link rel="stylesheet" href="./plugin/DataTables-1.10.0/extensions/TableTools/css/dataTables.tableTools.min.css" />
+        
+        <link rel="stylesheet" href="./css/default.css" />
+        <script src="./js/jquery-2.1.1.min.js"></script>
+<!--        <script src="./js/jquery.mobile-1.4.2.min.js"></script>-->
+        
+        <script src="./plugin/DataTables-1.10.0/media/js/jquery.dataTables.js"></script>
+        <script src="./plugin/DataTables-1.10.0/integration/bootstrap/bin/dataTables.bootstrap.js"></script>
+        <script src="./plugin/DataTables-1.10.0/extensions/TableTools/js/dataTables.tableTools.min.js"></script>
+        
+        <script src="./js/default.js"></script>
+      </head>
+      <body>
+<!--        <div data-role="page">
+        <header data-role="header">
+          <h1>Document Tracker</h1>
+          <a href="./" data-icon="home" data-iconpos="notext" class="ui-btn-left">Home</a>
+          <a href="#userpanel" data-icon="user" data-iconpos="notext" class="ui-btn-right">Account</a>
+        <?php
+        if(isLoggedIn() && $_SESSION["permission"]>0):
+        ?>
+          <div data-role="navbar">
+              <ul>
+                  <?php if(checkPermission(DT_PERM_ADDDOC)): ?><li><a href="./add" data-icon="plus">Add Document</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_USERMGMNT)): ?><li><a href="./users" data-icon="edit">User Management</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_AUDITLOG)): ?><li><a href="./auditlog" data-icon="eye">Audit Log</a></li><?php endif;?>
+              </ul>
+          </div>
+        <?php
+        endif;
+        ?>
+        </header>-->
+        <div role="main" class="ui-content">
+<?php }
+
 function dbConnect(){
   global $conn;
   $conn=new mysqli(DT_DB_SERVER, DT_DB_USER, DT_DB_PASSWORD, DT_DB_NAME);
@@ -367,5 +422,15 @@ function checkPermission($p,$a=NULL)
         $a=$_SESSION['permlist'];
     }
     return (isset($a)?(($a[$p]=="1")?true:false):false);
+}
+
+function displayPrintHeader()
+{
+    ?>
+        <header class="printheader">
+            <img src="quezonseal.jpg" alt="Santa Isabel Logo" class="headerlogo"/>
+            <div class="orgname">Provincial Government of Quezon</div>
+        </header>
+    <?php
 }
 ?>
