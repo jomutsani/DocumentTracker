@@ -480,6 +480,7 @@ if(!is_null($systempage))
             break;
         case "reports":
                 $users="";
+                $pagenames="";
                 global $conn;
                 dbConnect();
                 $stmt2=$conn->prepare("SELECT uid,fullname FROM user ORDER BY fullname ASC");
@@ -497,6 +498,21 @@ if(!is_null($systempage))
                 }
                 $stmt2->free_result();
                 
+                $stmt2=$conn->prepare("SELECT DISTINCT page FROM auditlog");
+                if($stmt2 === false) {
+                    trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                }
+                $stmt2->execute();
+                $stmt2->store_result();
+
+                if($stmt2->num_rows>0){
+                    $stmt2->bind_result($pagename);
+                    while($stmt2->fetch()):
+                        $pagenames .= '<option value="'.$pagename.'">'.$pagename.'</option>'; 
+                    endwhile;
+                }
+                $stmt2->free_result();
+                
                 displayHTMLPageHeader();?>
                 <header><h1>Reports</h1></header>
                 <article>
@@ -510,8 +526,8 @@ if(!is_null($systempage))
                                 </fieldset>
                             </form>
                         </div>-->
-                        <div data-role="collapsible">
-                            <h3>Documents</h3>
+                        <div data-role="collapsible" data-collapsed="false">
+                            <h3>List of Reports</h3>
                             <form action="./report?t=doclist" method="post" target="_blank">
                                 <fieldset data-role="collapsible" data-theme="a" data-inset="false">
                                     <legend>List of Documents</legend>
@@ -520,7 +536,7 @@ if(!is_null($systempage))
                                         <div class="ui-block-a">
                                             <label for="owner-filter-menu">Select User</label>
                                             <select id="owner-filter-menu" name="owner-filter-menu" data-native-menu="false" required="true" data-inline="true">
-                                                <option value="0">All users</option>
+                                                <option value="-1">All users</option>
                                                 <?php echo $users; ?>
                                             </select>
                                         </div>
@@ -541,11 +557,105 @@ if(!is_null($systempage))
                                     <div class="ui-grid-a">
                                         <div class="ui-block-a">
                                             <label for="startdateh01" data-inline="true">From</label>
-                                            <input type="date" data-inline="true" name="startdate" id="startdateh01" value="<?php echo date("Y-m-d"); ?>"/>
+                                            <input type="date" data-inline="true" name="startdate" id="startdateh01" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
                                         </div>
                                         <div class="ui-block-b">
                                             <label for="enddateh01" data-inline="true">To</label>
-                                            <input type="date" data-inline="true" name="enddate" id="enddateh01" value="<?php echo date("Y-m-d"); ?>"/>
+                                            <input type="date" data-inline="true" name="enddate" id="enddateh01" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
+                                        </div>
+                                    </div>
+                                    <input type="submit" value="Generate" data-inline="true"/>
+                                </fieldset>
+                            </form>
+                            
+                            <form action="./report?t=receivelist" method="post" target="_blank">
+                                <fieldset data-role="collapsible" data-theme="a" data-inset="false">
+                                    <legend>Document Receives</legend>
+                                    
+                                    <div class="ui-grid-c">
+                                        <div class="ui-block-a">
+                                            <label for="owner-filter-menu2">Select User</label>
+                                            <select id="owner-filter-menu2" name="owner-filter-menu" data-native-menu="false" required="true" data-inline="true">
+                                                <option value="-1">All users</option>
+                                                <?php echo $users; ?>
+                                            </select>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="departmentd02">Department</label>
+                                            <input type="text" id="departmentd02" name="department" placeholder="Department"/>
+                                        </div>
+                                        <div class="ui-block-c">
+                                            <label for="divisiond02">Division</label>
+                                            <input type="text" id="divisiond02" name="division" placeholder="Division"/>
+                                        </div>
+                                        <div class="ui-block-d">
+                                            <label for="sectiond02">Section</label>
+                                            <input type="text" id="sectiond02" name="section" placeholder="Section"/>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="ui-grid-a">
+                                        <div class="ui-block-a">
+                                            <label for="startdateh02" data-inline="true">From</label>
+                                            <input type="date" data-inline="true" name="startdate" id="startdateh02" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="enddateh02" data-inline="true">To</label>
+                                            <input type="date" data-inline="true" name="enddate" id="enddateh02" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
+                                        </div>
+                                    </div>
+                                    <input type="submit" value="Generate" data-inline="true"/>
+                                </fieldset>
+                            </form>
+                            
+                            <form action="./report?t=userlist" method="post" target="_blank">
+                                <fieldset data-role="collapsible" data-theme="a" data-inset="false">
+                                    <legend>User List</legend>
+                                    <input type="submit" value="Generate" data-inline="true"/>
+                                </fieldset>
+                            </form>
+                            
+                            <form action="./report?t=auditlog" method="post" target="_blank">
+                                <fieldset data-role="collapsible" data-theme="a" data-inset="false">
+                                    <legend>Audit Log</legend>
+                                    
+                                    <div class="ui-grid-d">
+                                        <div class="ui-block-a">
+                                            <label for="owner-filter-menu4">Select User</label>
+                                            <select id="owner-filter-menu4" name="owner-filter-menu" data-native-menu="false" required="true" data-inline="true">
+                                                <option value="-1">All users</option>
+                                                <?php echo $users; ?>
+                                            </select>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="page-filter-menu4">Select Pages</label>
+                                            <select id="page-filter-menu4" name="page-filter-menu" data-native-menu="false" data-inline="true">
+                                                <option value="">All pages</option>
+                                                <?php echo $pagenames; ?>
+                                            </select>
+                                        </div>
+                                        <div class="ui-block-c">
+                                            <label for="departmentd04">Department</label>
+                                            <input type="text" id="departmentd04" name="department" placeholder="Department"/>
+                                        </div>
+                                        <div class="ui-block-d">
+                                            <label for="divisiond04">Division</label>
+                                            <input type="text" id="divisiond04" name="division" placeholder="Division"/>
+                                        </div>
+                                        <div class="ui-block-e">
+                                            <label for="sectiond04">Section</label>
+                                            <input type="text" id="sectiond04" name="section" placeholder="Section"/>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="ui-grid-a">
+                                        <div class="ui-block-a">
+                                            <label for="startdateh04" data-inline="true">From</label>
+                                            <input type="date" data-inline="true" name="startdate" id="startdateh04" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <label for="enddateh04" data-inline="true">To</label>
+                                            <input type="date" data-inline="true" name="enddate" id="enddateh04" value="<?php echo date("Y-m-d"); ?>" placeholder="yyyy-mm-dd"/>
                                         </div>
                                     </div>
                                     <input type="submit" value="Generate" data-inline="true"/>
@@ -588,12 +698,24 @@ if(!is_null($systempage))
                         $department=filter_input(INPUT_POST, "department");
                         $division=filter_input(INPUT_POST, "division");
                         $section=filter_input(INPUT_POST, "section");
-                        $startdate=filter_input(INPUT_POST, "startdate");
-                        $enddate=filter_input(INPUT_POST, "enddate");
+                        $startdate=filter_input(INPUT_POST, "startdate")." 00:00:00";
+                        $enddate=filter_input(INPUT_POST, "enddate")." 23:59:59";
                         
                         $title="List of Documents";
                         $msg="";
-                        $sql="SELECT a.datecreated, a.trackingnumber, a.documentnumber,a.author,b.fullname,a.remarks FROM document a INNER JOIN user b ON a.author=b.uid WHERE a.datecreated>=? AND a.datecreated<=?";
+                        $sql="SELECT a.datecreated, LPAD(a.trackingnumber,8,'0'), a.documentnumber,a.author,b.fullname,a.remarks FROM document a INNER JOIN user b ON a.author=b.uid WHERE a.datecreated>=? AND a.datecreated<=?";
+                        if($uid>0){
+                            $sql.=" AND a.author=".$uid;
+                        }
+                        if($department!=""){
+                            $sql.=" AND b.department='".$department."'";
+                        }
+                        if($division!=""){
+                            $sql.=" AND b.division='".$division."'";
+                        }
+                        if($section!=""){
+                            $sql.=" AND b.section='".$section."'";
+                        }
                         $stmt=$conn->prepare($sql);
                         if($stmt === false) {
                             trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
@@ -614,12 +736,124 @@ if(!is_null($systempage))
                             }
                         }
                         break;
+                    case "receivelist":
+                        $uid=filter_input(INPUT_POST, "owner-filter-menu");
+                        $department=filter_input(INPUT_POST, "department");
+                        $division=filter_input(INPUT_POST, "division");
+                        $section=filter_input(INPUT_POST, "section");
+                        $startdate=filter_input(INPUT_POST, "startdate")." 00:00:00";
+                        $enddate=filter_input(INPUT_POST, "enddate")." 23:59:59";
+                        
+                        $title="List of Received Documents";
+                        $msg="";
+                        $sql="SELECT a.ts,LPAD(a.trackingnumber,8,'0'),c.remarks,a.remarks,CONCAT(b.fullname,' (',a.user,')') FROM documentlog a INNER JOIN document c ON a.trackingnumber=c.trackingnumber INNER JOIN user b ON a.user=b.uid WHERE a.ts>=? AND a.ts<=?";
+                        if($uid>0){
+                            $sql.=" AND a.user=".$uid;
+                        }
+                        if($department!=""){
+                            $sql.=" AND b.department='".$department."'";
+                        }
+                        if($division!=""){
+                            $sql.=" AND b.division='".$division."'";
+                        }
+                        if($section!=""){
+                            $sql.=" AND b.section='".$section."'";
+                        }
+                        $stmt=$conn->prepare($sql);
+                        if($stmt === false) {
+                            trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                        }
+                        $resultcolumns = ["Date","Tracking No.","Doc Desc.","Rec. Remarks","Received by"];
+                        $resultclasses = ["","","","",""];
+        //                $postusername=filter_input(INPUT_POST, "uid");
+        //                $postpassword=md5(filter_input(INPUT_POST, "password"));
+                        $stmt->bind_param('ss',$startdate,$enddate);
+                        $stmt->execute();
+
+                        $stmt->store_result();
+                        if($stmt->num_rows>0)
+                        {
+                            $stmt->bind_result($timestamp,$trackingnumber,$docdetails,$remarks,$fullname);
+                            while($stmt->fetch()){
+                                $resultset[]=array($timestamp,$trackingnumber,$docdetails,$remarks,$fullname);
+                            }
+                        }
+                        break;
+                    case "userlist":
+                        $title="List of Users";
+                        $msg="";
+                        $sql="SELECT uid, fullname, department, division, section, regdate FROM user";
+                        
+                        $stmt=$conn->prepare($sql);
+                        if($stmt === false) {
+                            trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                        }
+                        $resultcolumns = ["Employee ID","Name","Department","Division","Section","Registration Date"];
+                        $resultclasses = ["","","","","",""];
+                        $stmt->execute();
+
+                        $stmt->store_result();
+                        if($stmt->num_rows>0)
+                        {
+                            $stmt->bind_result($uid,$fullname,$department,$division,$section,$regdate);
+                            while($stmt->fetch()){
+                                $resultset[]=array($uid,$fullname,$department,$division,$section,$regdate);
+                            }
+                        }
+                        break;
+                    case "auditlog":
+                        $uid=filter_input(INPUT_POST, "owner-filter-menu");
+                        $pagename=filter_input(INPUT_POST, "page-filter-menu");
+                        $department=filter_input(INPUT_POST, "department");
+                        $division=filter_input(INPUT_POST, "division");
+                        $section=filter_input(INPUT_POST, "section");
+                        $startdate=filter_input(INPUT_POST, "startdate")." 00:00:00";
+                        $enddate=filter_input(INPUT_POST, "enddate")." 23:59:59";
+                        
+                        $title="Audit Log";
+                        $msg="";
+                        $sql="SELECT a.ts,CONCAT(b.fullname,' (',a.user,')'),a.page,a.msg FROM auditlog a INNER JOIN user b ON a.user=b.uid WHERE a.ts>=? AND a.ts<=?";
+                        if($uid>0){
+                            $sql.=" AND a.user=".$uid;
+                        }
+                        if($pagename!=""){
+                            $sql.=" AND a.page='".$pagename."'";
+                        }
+                        if($department!=""){
+                            $sql.=" AND b.department='".$department."'";
+                        }
+                        if($division!=""){
+                            $sql.=" AND b.division='".$division."'";
+                        }
+                        if($section!=""){
+                            $sql.=" AND b.section='".$section."'";
+                        }
+                        $stmt=$conn->prepare($sql);
+                        if($stmt === false) {
+                            trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                        }
+                        $resultcolumns = ["Date","User","Page","Message"];
+                        $resultclasses = ["","","",""];
+        //                $postusername=filter_input(INPUT_POST, "uid");
+        //                $postpassword=md5(filter_input(INPUT_POST, "password"));
+                        $stmt->bind_param('ss',$startdate,$enddate);
+                        $stmt->execute();
+
+                        $stmt->store_result();
+                        if($stmt->num_rows>0)
+                        {
+                            $stmt->bind_result($ts,$user,$page,$msg);
+                            while($stmt->fetch()){
+                                $resultset[]=array($ts,$user,$page,$msg);
+                            }
+                        }
+                        break;
                 }
 
 
                 $stmt->close();
                 dbClose();
-                displayPlainHTMLPageHeader($title)?>
+                displayPlainHTMLPageHeader($title); echo "<!-- $sql -->"; ?>
                         <script type="text/javascript">
                             $(document).ready(function() {
                                 rptbl=$('#tblreport').dataTable({

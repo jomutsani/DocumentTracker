@@ -114,13 +114,14 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
           <a href="./" data-icon="home" data-iconpos="notext" class="ui-btn-left">Home</a>
           <a href="#userpanel" data-icon="user" data-iconpos="notext" class="ui-btn-right">Account</a>
         <?php
-        if(isLoggedIn() && $_SESSION["permission"]>0):
+        if(isLoggedIn() && checkPermission(DT_PERM_ADDDOC) && checkPermission(DT_PERM_USERMGMNT) && checkPermission(DT_PERM_AUDITLOG)):
         ?>
           <div data-role="navbar">
               <ul>
                   <?php if(checkPermission(DT_PERM_ADDDOC)): ?><li><a href="./add" data-icon="plus">Add Document</a></li><?php endif;?>
                   <?php if(checkPermission(DT_PERM_USERMGMNT)): ?><li><a href="./users" data-icon="edit">User Management</a></li><?php endif;?>
                   <?php if(checkPermission(DT_PERM_AUDITLOG)): ?><li><a href="./auditlog" data-icon="eye">Audit Log</a></li><?php endif;?>
+                  <?php if(checkPermission(DT_PERM_REPORT)): ?><li><a href="./reports" data-icon="bullets">Reports</a></li><?php endif;?>
               </ul>
           </div>
         <?php
@@ -428,7 +429,7 @@ function displayPrintHeader()
 {
     ?>
         <header class="printheader">
-            <img src="quezonseal.jpg" alt="Santa Isabel Logo" class="headerlogo"/>
+            <img src="quezonseal.jpg" alt="Quezon Logo" class="headerlogo"/>
             <div class="orgname">Provincial Government of Quezon</div>
         </header>
     <?php
