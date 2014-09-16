@@ -254,6 +254,8 @@ if(!is_null($systempage))
                         <label for="checkbox05">User Management</label>
                         <input type="checkbox" name="p[]" id="checkbox06" value="32" <?php echo $uid?(checkPermission(DT_PERM_AUDITLOG,$permission)?'checked="checked"':''):''; ?>/>
                         <label for="checkbox06">Audit Log</label>
+                        <input type="checkbox" name="p[]" id="checkbox07" value="64" <?php echo $uid?(checkPermission(DT_PERM_REPORT,$permission)?'checked="checked"':''):''; ?>/>
+                        <label for="checkbox07">Reports</label>
                     </fieldset>
 
                     <input type="submit" value="<?php echo $uid?"Update":"Register"; ?>" data-icon="edit" data-ajax="false"/>
@@ -362,7 +364,7 @@ if(!is_null($systempage))
                         <tbody>
                             <?php global $conn;
                             dbConnect();
-                            $stmt=$conn->prepare("SELECT uid, fullname, department, division, section FROM user");
+                            $stmt=$conn->prepare("SELECT uid, fullname, department, division, section FROM user ORDER BY fullname");
                             if($stmt === false) {
                                 trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                             }

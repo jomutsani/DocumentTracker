@@ -114,7 +114,7 @@ function displayHTMLPageHeader($pagetitle=DT_PAGE_TITLE)
           <a href="./" data-icon="home" data-iconpos="notext" class="ui-btn-left">Home</a>
           <a href="#userpanel" data-icon="user" data-iconpos="notext" class="ui-btn-right">Account</a>
         <?php
-        if(isLoggedIn() && checkPermission(DT_PERM_ADDDOC) && checkPermission(DT_PERM_USERMGMNT) && checkPermission(DT_PERM_AUDITLOG)):
+        if(isLoggedIn() && (checkPermission(DT_PERM_ADDDOC) || checkPermission(DT_PERM_USERMGMNT) || checkPermission(DT_PERM_AUDITLOG) || checkPermission(DT_PERM_REPORT))):
         ?>
           <div data-role="navbar">
               <ul>
