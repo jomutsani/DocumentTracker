@@ -186,6 +186,35 @@ if(!is_null($systempage))
                 }
             }else{header("Location: ./");}
             break;
+        case "editreceive":
+            if(isLoggedIn() && checkPermission(DT_PERM_EDITDOCTRACK))
+            {
+                if(!is_null(filter_input(INPUT_POST, "trackingnumber")))
+                {
+                    global $conn;
+                    dbConnect();
+                    $stmt=$conn->prepare("UPDATE documentlog SET remarks=? WHERE logid=?");
+                    if($stmt === false) {
+                        trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
+                    }
+                    $userid=(isLoggedIn()?$_SESSION["uid"]:0);
+                    $trackingnumber=  filter_input(INPUT_POST, "trackingnumber");
+                    $logid=  filter_input(INPUT_POST, "logid");
+                    $posttxtremarks=  filter_input(INPUT_POST, "txtremarks");
+                    $stmt->bind_param('si',$posttxtremarks,$logid);
+                    $stmt->execute();
+
+                    setNotification("Receiving Remarks has been updated.");
+                    writeLog("Document ".str_pad($trackingnumber, 8, "0", STR_PAD_LEFT)." receiving remarks was changed to \"".$posttxtremarks."\".");
+                    dbClose();
+                    header("Location: ./?q=".$trackingnumber);
+                }
+                else
+                {
+                    header("Location: ./");
+                }
+            }else{header("Location: ./");}
+            break;
         case "regform":
             if(isLoggedIn() && checkPermission(DT_PERM_USERMGMNT))
             {

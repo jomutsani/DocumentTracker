@@ -381,10 +381,12 @@ function displaySearchResult()
               <th>Remarks</th>
               <th>Staff</th>
               <th>Department</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
           <?php
+            $editonce=false;
             while($stmt2->fetch())
             {
               ?>
@@ -393,6 +395,28 @@ function displaySearchResult()
                   <td><?php echo $r2_remarks;?></td>
                   <td><?php echo $r2_fullname." (".$r2_uid.")";?></td>
                   <td><?php echo $r2_department." (".$r2_section.")";?></td>
+                  <td>
+                      <?php if(!$editonce): ?>
+                      <?php if(isLoggedIn() && checkPermission(DT_PERM_EDITDOCTRACK)): ?>
+                      <a href="#editReceiveDialog<?php echo $r2_logid; ?>" data-role="button" data-inline="true" data-iconpos="notext" data-icon="edit" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
+                        <div data-role="popup" id="editReceiveDialog<?php echo $r2_logid; ?>" data-dismissible="false" data-overlay-theme="b">
+                            <header data-role="header">
+                              <h1>Edit Remarks</h1>
+                              <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+                            </header>
+                            <div role="main" class="ui-content">
+                              <form action="./editreceive" method="post" data-ajax="false">
+                                <label for="txtremarks" class="ui-hidden-accessible">Remarks</label>
+                                <textarea name="txtremarks" id="txtremarks" placeholder="Remarks"><?php echo $r2_remarks; ?></textarea>
+                                <input type="hidden" name="trackingnumber" value="<?php echo $r_trackingnumber; ?>"/>
+                                <input type="hidden" name="logid" value="<?php echo $r2_logid; ?>"/>
+                                <input type="submit" value="Modify" data-icon="arrow-d"/>
+                              </form>
+                            </div>
+                        </div>
+                      <?php endif; ?>
+                      <?php $editonce=true; endif; ?>
+                  </td>
                 </tr>
               <?php
             }
