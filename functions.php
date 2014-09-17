@@ -398,7 +398,7 @@ function displaySearchResult()
                   <td>
                       <?php if(!$editonce): ?>
                       <?php if(isLoggedIn() && checkPermission(DT_PERM_EDITDOCTRACK)): ?>
-                      <a href="#editReceiveDialog<?php echo $r2_logid; ?>" data-role="button" data-inline="true" data-iconpos="notext" data-icon="edit" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
+                      <a href="#editReceiveDialog<?php echo $r2_logid; ?>" data-role="button" data-inline="true" data-iconpos="notext" data-icon="edit" data-mini="true" data-rel="popup" data-position-to="window" data-transition="pop">Receive Document</a>
                         <div data-role="popup" id="editReceiveDialog<?php echo $r2_logid; ?>" data-dismissible="false" data-overlay-theme="b">
                             <header data-role="header">
                               <h1>Edit Remarks</h1>
