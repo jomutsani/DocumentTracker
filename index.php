@@ -734,7 +734,7 @@ if(!is_null($systempage))
                         
                         $title="List of Documents";
                         $msg="";
-                        $sql="SELECT a.datecreated, LPAD(a.trackingnumber,8,'0'), a.documentnumber,a.author,b.fullname,a.remarks FROM document a INNER JOIN user b ON a.author=b.uid WHERE a.datecreated>=? AND a.datecreated<=?";
+                        $sql="SELECT a.datecreated, LPAD(a.trackingnumber,8,'0'), a.documentnumber,a.author,b.fullname,a.remarks,c.remarks FROM document a inner join (select trackingnumber, max(logid) as lid from documentlog group by trackingnumber) b USING(trackingnumber) INNER JOIN documentlog c on c.logid=b.lid INNER JOIN user b ON a.author=b.uid WHERE a.datecreated>=? AND a.datecreated<=?";
                         if($uid>0){
                             $sql.=" AND a.author=".$uid;
                         }
@@ -751,8 +751,8 @@ if(!is_null($systempage))
                         if($stmt === false) {
                             trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         }
-                        $resultcolumns = ["Date","Tracking No.","Document No.","User ID","Full Name","Remarks"];
-                        $resultclasses = ["","","","","",""];
+                        $resultcolumns = ["Date","Tracking No.","Document No.","User ID","Full Name","Remarks","Status"];
+                        $resultclasses = ["","","","","","",""];
         //                $postusername=filter_input(INPUT_POST, "uid");
         //                $postpassword=md5(filter_input(INPUT_POST, "password"));
                         $stmt->bind_param('ss',$startdate,$enddate);
@@ -761,9 +761,9 @@ if(!is_null($systempage))
                         $stmt->store_result();
                         if($stmt->num_rows>0)
                         {
-                            $stmt->bind_result($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks);
+                            $stmt->bind_result($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks,$status);
                             while($stmt->fetch()){
-                                $resultset[]=array($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks);
+                                $resultset[]=array($datecreated,$trackingnumber,$documentnumber,$userid,$fullname,$remarks,$status);
                             }
                         }
                         break;
