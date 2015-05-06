@@ -72,3 +72,8 @@
     margin-top: 2em;
     display: block !important;
 }
+.loghidden{
+    /*color: #FCC;*/
+    font-style: italic;
+    opacity: 0.5;
+}
