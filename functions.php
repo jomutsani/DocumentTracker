@@ -277,7 +277,7 @@ function displaySearchResult()
     {
       global $conn;
       dbConnect();
-      $stmt=$conn->prepare("SELECT a.id, a.barcodenumber, a.documentcategory, c.description, a.documentnumber, a.remarks, a.datecreated, a.author, b.uid, b.fullname, b.department, b.section, a.end FROM document a INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory c ON a.documentcategory=c.id WHERE barcodenumber=?");
+      $stmt=$conn->prepare("SELECT a.id, a.barcodenumber, a.documentcategory, c.description, a.documentnumber, a.remarks, a.datecreated, a.author, b.uid, b.fullname, b.department, b.section, a.end FROM document a INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory c ON a.documentcategory=c.id WHERE barcodenumber=? AND a.active=1");
       if($stmt === false) {
         trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
       }
@@ -355,9 +355,11 @@ function displaySearchResult()
                           <input type="checkbox" name="finalrelease" id="chkfinal" value="1"/>
                         Final Release
                       </label>
-                      <?php if(checkPermission(DT_PERM_HIDDENRECEIVE)): ?>
+                      <?php if(checkPermission(DT_PERM_HIDDENRECEIVE)):
+                          $chkhidden = (is_null(filter_input(INPUT_COOKIE, "chkhidden", FILTER_SANITIZE_NUMBER_INT))?0:filter_input(INPUT_COOKIE, "chkhidden", FILTER_SANITIZE_NUMBER_INT));
+                      ?>
                         <label for="hiddenreceive">
-                            <input type="checkbox" name="hiddenreceive" id="chkhiddenreceive" value="1"/>
+                            <input type="checkbox" data-on-text="Hidden" data-off-text="Visible" name="hiddenreceive" id="chkhiddenreceive" value="1" <?php echo (($chkhidden>0)?"":"checked='checked'"); ?> />
                           Hidden
                         </label>
                       <?php else: ?>

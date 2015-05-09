@@ -123,7 +123,7 @@ if(!is_null($systempage))
                     $category="";
                     dbConnect();
                     
-                    $stmt = $conn->prepare("SELECT documentnumber,remarks,documentcategory,barcodenumber FROM document WHERE id=?");
+                    $stmt = $conn->prepare("SELECT documentnumber,remarks,documentcategory,barcodenumber FROM document WHERE id=? AND active=1");
                     $stmt->bind_param("i",$tid);
                     $stmt->execute();
                     $stmt->store_result();
@@ -191,7 +191,11 @@ if(!is_null($systempage))
                 $postdoccategory=filter_input(INPUT_POST, "category-filter-menu",FILTER_SANITIZE_NUMBER_INT);
                 $postbarcodenumber=filter_input(INPUT_POST, "barcodenumber",FILTER_SANITIZE_STRING);
                 $stmt->bind_param('ssisi',$postdocnumber,$postremarks,$userid,$postbarcodenumber,$postdoccategory);
-                $stmt->execute();
+                $s=$stmt->execute();
+                if(!$s){
+                    echo $stmt->error;
+                    die();
+                }
                 $trackno = $stmt->insert_id;
                 $stmt->close();
 
@@ -207,7 +211,7 @@ if(!is_null($systempage))
                 setNotification("Document was successfully added. Tracking number is <strong>".$postbarcodenumber."</strong>.");
                 writeLog("Document ".$postbarcodenumber." has been added by ".$_SESSION["fullname"]."(".$_SESSION["uid"].").");
                 dbClose();
-                header("Location: ./?q=".$postbarcodenumber);
+                //header("Location: ./?q=".$postbarcodenumber);
             }else{header("Location: ./");}
             break;
         case "editdoc":
@@ -254,6 +258,8 @@ if(!is_null($systempage))
                     $postbarcodenumber=filter_input(INPUT_POST, "barcodenumber",FILTER_SANITIZE_STRING);
                     $stmt->bind_param('isii',$posttrackingnumber,$posttxtremarks,$userid,$posthidden);
                     $stmt->execute();
+                    
+                    setcookie("chkhidden", $posthidden);
                     
                     if($postfinalrelease==1)
                     {
@@ -492,7 +498,7 @@ if(!is_null($systempage))
                 <header><h1>Users</h1></header>
                 <article>
                     <a href="./regform" data-role="button" data-icon="plus" data-inline="true">Add User</a>
-                    <table class="ui-responsive table-stripe" data-role="table" data-mode="columntoggle" id="tblUserList">
+                    <table class="ui-responsive table-stripe ui-body-a" data-role="table" data-mode="columntoggle" id="tblUserList">
                         <thead>
                             <tr>
                                 <th data-priority="2">Employee ID</th>
@@ -906,7 +912,7 @@ if(!is_null($systempage))
                         
                         $title="List of Documents";
                         $msg="";
-                        $sql="SELECT a.datecreated, a.barcodenumber, a.documentnumber,a.author,b.fullname,a.remarks,c.remarks,d.description,a.end FROM document a inner join (select docid, max(logid) as lid from documentlog group by docid) b ON b.docid=a.id INNER JOIN documentlog c on c.logid=b.lid INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory d ON a.documentcategory=d.id WHERE a.datecreated>=? AND a.datecreated<=?";
+                        $sql="SELECT a.datecreated, a.barcodenumber, a.documentnumber,a.author,b.fullname,a.remarks,c.remarks,d.description,a.end FROM document a inner join (select docid, max(logid) as lid from documentlog group by docid) b ON b.docid=a.id INNER JOIN documentlog c on c.logid=b.lid INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory d ON a.documentcategory=d.id WHERE a.datecreated>=? AND a.datecreated<=? AND a.active=1";
                         if($uid>0){
                             $sql.=" AND a.author=".$uid;
                         }
@@ -955,7 +961,7 @@ if(!is_null($systempage))
                         
                         $title="List of Received Documents";
                         $msg="";
-                        $sql="SELECT a.ts,LPAD(a.docid,8,'0'),c.remarks,a.remarks,CONCAT(b.fullname,' (',a.user,')') FROM documentlog a INNER JOIN document c ON a.docid=c.id INNER JOIN user b ON a.user=b.uid WHERE a.ts>=? AND a.ts<=?";
+                        $sql="SELECT a.ts,LPAD(a.docid,8,'0'),c.remarks,a.remarks,CONCAT(b.fullname,' (',a.user,')'),c.end FROM documentlog a INNER JOIN document c ON a.docid=c.id INNER JOIN user b ON a.user=b.uid WHERE a.ts>=? AND a.ts<=? AND c.active=1";
                         if($uid>0){
                             $sql.=" AND a.user=".$uid;
                         }
@@ -972,8 +978,8 @@ if(!is_null($systempage))
                         if($stmt === false) {
                             trigger_error('<strong>Error:</strong> '.$conn->error, E_USER_ERROR);
                         }
-                        $resultcolumns = ["Date","Tracking No.","Doc Desc.","Rec. Remarks","Received by"];
-                        $resultclasses = ["","","","",""];
+                        $resultcolumns = ["Date","Tracking No.","Doc Desc.","Rec. Remarks","Received by","Released"];
+                        $resultclasses = ["","","","","",""];
         //                $postusername=filter_input(INPUT_POST, "uid");
         //                $postpassword=md5(filter_input(INPUT_POST, "password"));
                         $stmt->bind_param('ss',$startdate,$enddate);
@@ -982,9 +988,9 @@ if(!is_null($systempage))
                         $stmt->store_result();
                         if($stmt->num_rows>0)
                         {
-                            $stmt->bind_result($timestamp,$trackingnumber,$docdetails,$remarks,$fullname);
+                            $stmt->bind_result($timestamp,$trackingnumber,$docdetails,$remarks,$fullname,$released);
                             while($stmt->fetch()){
-                                $resultset[]=array($timestamp,$trackingnumber,$docdetails,$remarks,$fullname);
+                                $resultset[]=array($timestamp,$trackingnumber,$docdetails,$remarks,$fullname,($released?"Yes":"No"));
                             }
                         }
                         break;
@@ -1006,7 +1012,7 @@ if(!is_null($systempage))
                         {
                             $stmt->bind_result($uid,$fullname,$department,$division,$section,$regdate);
                             while($stmt->fetch()){
-                                $resultset[]=array($uid,$fullname,$department,$division,$section,$regdate);
+                                $resultset[]=array(str_pad($uid,4,"0",STR_PAD_LEFT),$fullname,$department,$division,$section,$regdate);
                             }
                         }
                         break;
@@ -1270,7 +1276,7 @@ if(!is_null($systempage))
                 $pageno=filter_input(INPUT_GET, "p",FILTER_SANITIZE_NUMBER_INT);
                 $pagesize=10;
 
-                $sql="SELECT SQL_CALC_FOUND_ROWS a.datecreated, a.barcodenumber, a.documentnumber,a.author,b.fullname,a.remarks,c.remarks FROM document a inner join (select docid, max(logid) as lid from documentlog group by docid) b USING(id) INNER JOIN documentlog c on c.logid=b.lid INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory d ON d.id=a.documentcategory WHERE a.datecreated>=? AND a.datecreated<=? AND MATCH(a.barcodenumber,a.remarks) AGAINST (?)";
+                $sql="SELECT SQL_CALC_FOUND_ROWS a.datecreated, a.barcodenumber, a.documentnumber,a.author,b.fullname,a.remarks,c.remarks FROM document a inner join (select docid, max(logid) as lid from documentlog group by docid) b ON b.docid=a.id INNER JOIN documentlog c on c.logid=b.lid INNER JOIN user b ON a.author=b.uid INNER JOIN documentcategory d ON d.id=a.documentcategory WHERE a.datecreated>=? AND a.datecreated<=? AND MATCH(a.barcodenumber,a.remarks) AGAINST (?) AND a.active=1";
                 if($uid>0){
                     $sql.=" AND a.author=".$uid;
                 }
